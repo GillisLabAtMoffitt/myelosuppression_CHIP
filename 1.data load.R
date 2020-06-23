@@ -114,8 +114,8 @@ d <- data %>%
   ))
 
 venn.diagram(
-  x = list(data$NGS_ID %>% filter(CHIP == "Yes"),
-           data$NGS_ID),
+  x = list(CHIP = c(unique(data[data$CHIP == "Yes",]$NGS_ID)),
+           CHPD = c(unique(data[data$CHPD == "Yes",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD"),
   filename = 'Patient .png',
   output=TRUE,
@@ -128,6 +128,7 @@ venn.diagram(
   compression = "lzw",
   
   # Circles
+  main = "Patients exhibiting CHIP vs CHPD",
   lwd = 2,
   lty = 'blank',
   fill = c("darkgrey", "#FEA873FF"),
@@ -137,13 +138,42 @@ venn.diagram(
   cex = .6,
   fontface = "bold",
   fontfamily = "sans",
-  cat.pos = c(-20, 160),
-  cat.dist = c(0.055, 0.055),
-  #ext.percent = 2,
-  rotation.degree = -90
-  
+  cat.pos = c(0, 180),
+  cat.dist = c(0.025, -0.08)
 )
+venn.diagram(
+  x = list(CHIP = c(unique(data[data$CHIP == "Yes",]$NGS_ID)),
+           CHPD = c(unique(data[data$CHPD == "Yes",]$NGS_ID)),
+           CHIPno = c(unique(data[data$CHIP == "No",]$NGS_ID))),
+  category.names = c("CHIP" , "CHPD", "none"),
+  filename = 'Patient .png',
+  output=TRUE,
+  
+  # Output features
+  imagetype="png" ,
+  height = 700 , 
+  width = 700 , 
+  resolution = 300,
+  compression = "lzw",
+  
+  # Circles
+  main = "Mutations presented by patients",
+  main.pos = c(0.5, .9),
+  lwd = 2,
+  lty = 'blank',
+  fill = c("#CC4678FF", "#F0F921FF", "#0D0887FF"),
+  margin = 0.07,
+  
+  # Numbers
+  cex = .5,
+  fontface = "bold",
+  fontfamily = "sans",
+  cat.pos = c(0, 180, 0),
+  cat.dist = c(0.055, -0.07, 0.015),
+  cat.cex = .7
+  #ext.percent = 2,
 
+)
 
 
 
