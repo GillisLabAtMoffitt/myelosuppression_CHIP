@@ -46,8 +46,8 @@ table %>% mutate(Var1 = fct_reorder(Var1, desc(Freq))) %>%
   labs(x="", y="", title="Cancer type Repartition")
 
 # Age
-p <- qplot(x =Age, data=data, fill=..count.., geom="histogram") 
-p + scale_fill_viridis_c(
+qplot(x =Age, data=data, fill=..count.., geom="histogram")+
+  scale_fill_viridis_c(
   alpha = 1,
   begin = 0,
   end = 1,
@@ -93,7 +93,9 @@ data %>% group_by(Case_Control,CHIP) %>%
   labs(x = "", y = "percent", title = "Prevalence of CHIP") +
   theme_minimal()+
   geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
-  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))
+  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(data$Case_Control, data$CHIP))[3]),
+           color = "black", size = 6, hjust = 0, vjust = 1)
 
 # CHPD prevalence
 data %>% group_by(Case_Control,CHPD) %>% 
@@ -105,19 +107,35 @@ data %>% group_by(Case_Control,CHPD) %>%
   labs(x = "", y = "percent", title = "Prevalence of CHPD") +
   theme_minimal()+
   geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
-  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))
+  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(data$Case_Control, data$CHPD))[3]),
+           color = "black", size = 6, hjust = 0, vjust = 1)
+
+
+data %>% 
+  select(Case_Control, CHIP, CHPD) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p()
+data %>% 
+  select(Case_Control, CHIP) %>% 
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p()
+data %>% 
+  select(Case_Control, CHPD) %>% 
+  tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p()
+chisq.test(table(data$Case_Control, data$CHIP))
+chisq.test(table(data$Case_Control, data$CHIP))$residuals
+chisq.test(table(data$Case_Control, data$CHPD))
+chisq.test(table(data$Case_Control, data$CHPD))$residuals
+
 
 # CHIP vs CHPD
-d <- data %>% 
-  mutate(CHIPid = case_when(
-    CHIP == "Yes" ~ .$NGS_ID
-  ))
-
 venn.diagram(
   x = list(CHIP = c(unique(data[data$CHIP == "Yes",]$NGS_ID)),
            CHPD = c(unique(data[data$CHPD == "Yes",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD"),
-  filename = 'Patient .png',
+  filename = 'Patients exhibiting CHIP vs CHPD.png',
   output=TRUE,
   
   # Output features
@@ -146,7 +164,7 @@ venn.diagram(
            CHPD = c(unique(data[data$CHPD == "Yes",]$NGS_ID)),
            CHIPno = c(unique(data[data$CHIP == "No",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD", "none"),
-  filename = 'Patient .png',
+  filename = 'Mutations presented by patients.png',
   output=TRUE,
   
   # Output features
@@ -175,7 +193,38 @@ venn.diagram(
 
 )
 
+# CHIP in age, gender, race, ethnicity
+table1 <- data %>% 
+  select(CHIP, Age, Gender, Race, Ethnicity) %>% 
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+table2 <- data %>% 
+  select(CHPD, Age, Gender, Race, Ethnicity) %>% 
+  tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl_merge(list(table1, table2),
+          tab_spanner = c("**CHIP**", "**CHPD**")) 
 
+table1 <- data %>% 
+  select(CHIP, Age, CANCER) %>%
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+table2 <- data %>% 
+  select(CHPD, Age, CANCER) %>%
+  tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n() %>% 
+  simul
+tbl_merge(list(table1, table2),
+          tab_spanner = c("**CHIP**", "**CHPD**")) 
 
+data %>% 
+  select(CHIP, Age, CANCER) %>%
+  tbl_summary(by= CANCER, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
 
 
