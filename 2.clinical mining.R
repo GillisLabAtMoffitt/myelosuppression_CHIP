@@ -96,6 +96,81 @@ data %>% group_by(Case_Control,CHPD) %>%
 # dev.off()
 
 
+############################################################################################## I ### Mutation mining----
+# Allelic Variant
+
+ggplot(global_data, aes(x=Case_Control, y= VAF)) +
+  geom_jitter(position = position_jitter(0.25), size = 1.2) +
+  stat_summary(
+    fun.data="mean_sdl",  fun.args = list(mult=1), 
+    geom = "pointrange",  size = 0.4
+  )
+
+
+global_data.summary <- global_data %>%
+  group_by(Case_Control) %>% 
+  filter(!is.na(VAF)) %>% 
+  summarise(
+    sd = sd(VAF, na.rm = TRUE),
+    VAF = mean(VAF),
+    meadian = median(VAF),
+    min = min(VAF),
+    max = max(VAF)
+  )
+
+ggplot(global_data.summary, aes(x=Case_Control, y= meadian, ymin = meadian-sd, ymax = meadian+sd)) +
+  geom_pointrange()
+
+ggplot(global_data, aes(x=Case_Control, y= VAF)) +
+  geom_jitter(
+    position = position_jitter(0.2), color = "darkgray"
+  ) + 
+  geom_pointrange(
+    aes(ymin = meadian-sd, ymax = meadian+sd),
+    data = global_data.summary
+  )
+
+ggplot(global_data, aes(x=Case_Control, y= VAF))+
+  geom_dotplot(
+  binaxis = "y", stackdir = "center",
+  fill = "lightgray"
+) + 
+  stat_summary(
+    fun.data = "mean_sdl", fun.args = list(mult=1), 
+    geom = "pointrange", color = "red"
+  )
+
+
+ggplot(global_data, aes(x=Case_Control, y=VAF)) +
+  geom_bar(stat = "summary_bin", fun = mean)
+
+
+# Number/% of Patients with CHIP
+global_data %>% filter(!is.na(GENE)) %>% group_by(Case_Control,GENE) %>% 
+  summarise(count=n()) %>% 
+  ggplot(aes(x=reorder(GENE, -count), y=count, fill = Case_Control)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
+  coord_flip()
+
+global_data %>% filter(!is.na(GENE)) %>% group_by(Case_Control,GENE) %>% 
+  summarise(count=n()) %>% 
+  mutate(percent=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=reorder(GENE, -percent), y=percent, fill = Case_Control)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
+  coord_flip()
+
+table(global_data$Case_Control)
+
+global_data %>% 
+  select(Case_Control, GENE) %>% 
+  tbl_summary(by=Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+
+
+
+
 
 
 

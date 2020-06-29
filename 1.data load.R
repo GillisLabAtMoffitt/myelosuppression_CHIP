@@ -17,7 +17,8 @@ CHIP_muts <-
 #######################################################################################  II  ### Data cleaning----
 # 1.1.Clinical----
 data <- data %>% 
-  mutate(Case_Control = factor(Case_Control, labels = c("Control", "Case"))) %>% 
+  mutate(Case_Control = factor(Case_Control, labels = c("Controls", "Cases"))) %>% 
+  mutate(Case_Control = factor(Case_Control, levels= c("Cases", "Controls"))) %>% 
   mutate(CHIP = factor(CHIP, labels=c("No", "Yes"))) %>% 
   mutate(CHPD= factor(CHPD, labels=c("No", "Yes"))) %>% 
   mutate(Race = factor(Race, labels=c("White", "Other"))) %>% 
@@ -34,15 +35,22 @@ data <- data %>%
 unique_patient_in_mutation <- as.data.frame(unique(CHIP_muts$patient_id)) %>% 
   `colnames<-` (c("patient_id"))
 CHIP_muts <- CHIP_muts %>% drop_na("DATA")
-CHIP_muts <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
-                   value.var = c("CHROM", "POS", "REF", "ALT", "GENE", "VARIANT_C", "VARIANT_P",
-                                 "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "INFO",
-                                 "FORMAT", "DATA"))
+# CHIP_muts <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
+#                    value.var = c("CHROM", "POS", "REF", "ALT", "GENE", "VARIANT_C", "VARIANT_P",
+#                                  "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "INFO",
+#                                  "FORMAT", "DATA"))
 CHIP_muts <- left_join(unique_patient_in_mutation, CHIP_muts, by = "patient_id")
 
 
 # Cleaning 
 rm(unique_patient_in_mutation)
+
+
+#######################################################################################  III  ### Data binding----
+global_data <- full_join(data[3:32], CHIP_muts, 
+                          by = c("NGS_ID" = "patient_id"))
+
+
 #######################################################################################  III  ### Data mining
 
 
