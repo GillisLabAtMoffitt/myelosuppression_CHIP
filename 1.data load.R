@@ -31,9 +31,6 @@ data <- data %>%
   mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes")))
 
 # 1.2.Mutations----
-
-colnames(CHIP_muts)
-duplicated(CHIP_muts$patient_id)
 unique_patient_in_mutation <- as.data.frame(unique(CHIP_muts$patient_id)) %>% 
   `colnames<-` (c("patient_id"))
 CHIP_muts <- CHIP_muts %>% drop_na("DATA")
@@ -41,7 +38,7 @@ CHIP_muts <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
                    value.var = c("CHROM", "POS", "REF", "ALT", "GENE", "VARIANT_C", "VARIANT_P",
                                  "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "INFO",
                                  "FORMAT", "DATA"))
-CHIP_muts <- left_join(unique_patient_in_mutation, CHIP_muts1, by = "patient_id")
+CHIP_muts <- left_join(unique_patient_in_mutation, CHIP_muts, by = "patient_id")
 
 
 # Cleaning 
