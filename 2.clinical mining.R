@@ -368,26 +368,14 @@ tbl <- as.data.frame(table(global_data$FUNCTION, global_data$GENE)) %>%
 # write.csv(tbl, paste0(path, "/Output/Fonction type per gene.csv"))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ############################################################################################## III ### Clinical mining----
 
 # Cancer repartition pie ----
-table <- as.data.frame(table(clinical$CANCER))
-colourCount = length(unique(table$Var1))
+tbl <- as.data.frame(table(clinical$CANCER))
+colourCount = length(unique(tbl$Var1))
 getPalette = colorRampPalette(RColorBrewer::brewer.pal(8, "Accent"))(colourCount)
 # pdf(paste0(path, "/Output/Cancer repartition.pdf"))
-table %>% mutate(Var1 = fct_reorder(Var1, desc(Freq))) %>%
+tbl %>% mutate(Var1 = fct_reorder(Var1, desc(Freq))) %>%
   ggplot(aes(x="", y=Freq, fill=Var1)) +
   geom_bar(stat="identity", width=1) +
   scale_fill_manual(name = "Cancer type", values = getPalette) +
@@ -395,6 +383,15 @@ table %>% mutate(Var1 = fct_reorder(Var1, desc(Freq))) %>%
   coord_polar("y", start=0, direction=-1) +
   labs(x="", y="", title="Cancer type Repartition")
 # dev.off()
+
+tbl <- as.data.frame(table(global_data$CHIP,global_data$CANCER))
+tbl %>% mutate(Var2 = fct_reorder(Var2, desc(Freq))) %>%
+  ggplot(aes(x=Var2, y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width = .75, position = position_dodge(preserve = "single")) +
+  scale_fill_discrete(name = "CHIP") +
+  theme_minimal() +
+  coord_flip()+
+  labs(x="Cancer Type", y="Number of Patient", title="CHIP in Cancer type Repartition")
 
 # Age
 # pdf(paste0(path, "/Output/Age repartition.pdf"))
@@ -417,34 +414,55 @@ qplot(x =Age, data=clinical, fill=..count.., geom="histogram")+
 
 # pdf(paste0(path, "/Output/Age.pdf")) # Age per cancer
 ggplot(data = clinical, aes(x=CANCER, y=Age), fill=CANCER) +
-  geom_boxplot(color= magma(n=25)) +
+  geom_boxplot(color= magma(n=22)) +
   theme_minimal() +
   labs(x="Cancer type", y="Age", title="Age repartition per cancer") +
   coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2))
 # dev.off()
+ggplot(data = clinical, aes(x=CANCER, y=Age), fill=CANCER) +
+  geom_boxplot(color= magma(n=32)) +
+  theme_minimal() +
+  labs(x="Cancer type", y="Age", title="Age repartition per cancer") +
+  coord_flip() +
+  geom_jitter(shape=16, position=position_jitter(0.2))+
+  facet_grid(rows = vars(CHIP))
 
 # pdf(paste0(path, "/Output/Gender.pdf"))
 ggplot(data = clinical, aes(x=Gender, y=Age), fill=Gender) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Gender", y="Age", title="Age repartition") +
-  geom_jitter(shape=16, position=position_jitter(0.2))
+  geom_jitter(shape=16, position=position_jitter(0.2))+
+  facet_grid(. ~ CHIP)
 # dev.off()
 
-# pdf(paste0(path, "/Output/Gender2.pdf"))
-ggplot(data = clinical, aes(x=Gender, y=Age), fill=Gender) +
+# pdf(paste0(path, "/Output/Race.pdf"))
+ggplot(data = clinical, aes(x=Race, y=Age), fill=Race) +
   geom_boxplot() +
   theme_minimal() +
-  labs(x="Gender", y="Age", title="Age repartition") +
-  coord_flip() +
+  labs(x="Race", y="Age", title="Age repartition") +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  facet_grid(. ~ CANCER)
+  facet_grid(. ~ CHIP)
 # dev.off()
 
+# pdf(paste0(path, "/Output/Ethnicity.pdf"))
+ggplot(data = clinical, aes(x=Ethnicity, y=Age), fill=Ethnicity) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x="Ethnicity", y="Age", title="Age repartition") +
+  geom_jitter(shape=16, position=position_jitter(0.2)) +
+  facet_grid(. ~ CHIP)
+# dev.off()
 
-
-
+# pdf(paste0(path, "/Output/Smoking.pdf"))
+ggplot(data = clinical, aes(x=Smoking, y=Age), fill=Smoking) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x="Smoking", y="Age", title="Age repartition") +
+  geom_jitter(shape=16, position=position_jitter(0.2)) +
+  facet_grid(. ~ CHIP)
+# dev.off()
 
 
 
