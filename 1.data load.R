@@ -5,18 +5,19 @@ library(ggplot2)
 library(viridis)
 library(gtsummary)
 library(VennDiagram)
+library(ggpubr)
 
 #######################################################################################  I  ### Load data----
 path <- fs::path("","Volumes","Gillis_Research","Christelle Colin-Leitzinger", "CHIP_myelosuppression_M4M 2018")
 #---
-data <-
+clinical <-
   read_csv(paste0(path, "/data/CHIP_CRASH_data_for_stats_v05.csv"))
 CHIP_muts <- 
-  read_csv(paste0(path, "/data/all CH_myelosupp_muts_2018_wUNC.csv"))
+  read_csv(paste0(path, "/data/cleaned CH_myelosupp_muts_2020_CC.csv"))
 
 #######################################################################################  II  ### Data cleaning----
 # 1.1.Clinical----
-data <- data %>% 
+clinical <- clinical %>% 
   mutate(Case_Control = factor(Case_Control, labels = c("Controls", "Cases"))) %>% 
   mutate(Case_Control = factor(Case_Control, levels= c("Cases", "Controls"))) %>% 
   mutate(CHIP = factor(CHIP, labels=c("No", "Yes"))) %>% 
@@ -29,7 +30,8 @@ data <- data %>%
   mutate(Anemia = factor(Anemia, labels=c("No", "Yes"))) %>% 
   mutate(Thrombo = factor(Thrombo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
-  mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes")))
+  mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes"))) %>%
+  filter(Cohort == "M4M")# remove later
 
 # 1.2.Mutations----
 unique_patient_in_mutation <- as.data.frame(unique(CHIP_muts$patient_id)) %>% 
@@ -47,108 +49,22 @@ rm(unique_patient_in_mutation)
 
 
 #######################################################################################  III  ### Data binding----
-global_data <- full_join(data[3:32], CHIP_muts, 
-                          by = c("NGS_ID" = "patient_id"))
+global_data <- full_join(clinical[3:32], CHIP_muts, 
+                          by = c("NGS_ID" = "patient_id")) %>% 
+  filter(str_detect(NGS_ID, "M4M"))# remove later
 
 
 #######################################################################################  III  ### Data mining
 
 
 # Tables----
-table <- data %>% 
-  select(Case_Control, CHIP, CHPD) %>% 
-  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
-  add_p() %>% add_overall() %>% as_gt()
-gt::gtsave(table, expand = 1, zoom = 2, 
-           paste0(
-             path, 
-             "/Output/CHIP and CHPD in Case_Control.pdf"))
-table <- data %>% 
-  select(Case_Control, CHIP) %>% 
-  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
-  add_p() %>% as_gt()
-gt::gtsave(table, expand = 1, zoom = 2, 
-           paste0(
-             path, 
-             "/Output/CHIP and CHPD in Case_Control.pdf"))
-table <- data %>% 
-  select(Case_Control, CHPD) %>% 
-  tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
-  add_p() %>% as_gt()
-gt::gtsave(table, expand = 1, zoom = 2, 
-           paste0(
-             path, 
-             "/Output/CHIP and CHPD in Case_Control.pdf"))
-chisq.test(table(data$Case_Control, data$CHIP))
-chisq.test(table(data$Case_Control, data$CHIP))$residuals
-chisq.test(table(data$Case_Control, data$CHPD))
-chisq.test(table(data$Case_Control, data$CHPD))$residuals
 
 
-# CHIP vs CHPD
-venn.diagram(
-  x = list(CHIP = c(unique(data[data$CHIP == "Yes",]$NGS_ID)),
-           CHPD = c(unique(data[data$CHPD == "Yes",]$NGS_ID))),
-  category.names = c("CHIP" , "CHPD"),
-  filename = 'Patients exhibiting CHIP vs CHPD.png',
-  output=TRUE,
-  
-  # Output features
-  imagetype="png" ,
-  height = 700 , 
-  width = 700 , 
-  resolution = 300,
-  compression = "lzw",
-  
-  # Circles
-  main = "Patients exhibiting CHIP vs CHPD",
-  lwd = 2,
-  lty = 'blank',
-  fill = c("darkgrey", "#FEA873FF"),
-  margin = 0.05,
-  
-  # Numbers
-  cex = .6,
-  fontface = "bold",
-  fontfamily = "sans",
-  cat.pos = c(0, 180),
-  cat.dist = c(0.025, -0.08)
-)
-venn.diagram(
-  x = list(CHIP = c(unique(data[data$CHIP == "Yes",]$NGS_ID)),
-           CHPD = c(unique(data[data$CHPD == "Yes",]$NGS_ID)),
-           CHIPno = c(unique(data[data$CHIP == "No",]$NGS_ID))),
-  category.names = c("CHIP" , "CHPD", "none"),
-  filename = 'Mutations presented by patients.png',
-  output=TRUE,
-  
-  # Output features
-  imagetype="png" ,
-  height = 700 , 
-  width = 700 , 
-  resolution = 300,
-  compression = "lzw",
-  
-  # Circles
-  main = "Mutations presented by patients",
-  main.pos = c(0.5, .9),
-  lwd = 2,
-  lty = 'blank',
-  fill = c("#CC4678FF", "#F0F921FF", "#0D0887FF"),
-  margin = 0.07,
-  
-  # Numbers
-  cex = .5,
-  fontface = "bold",
-  fontfamily = "sans",
-  cat.pos = c(0, 180, 0),
-  cat.dist = c(0.055, -0.07, 0.015),
-  cat.cex = .7
-  #ext.percent = 2,
 
-)
+
+
 # Table 1_Patient Population
-table <- data %>% 
+table <- clinical %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
          ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
@@ -163,7 +79,7 @@ gt::gtsave(table, expand = 1, zoom = 2,
              path, 
              "/Output/Table 1_Patient Population.pdf"))
 # Filtered
-table1 <- data %>% 
+table1 <- clinical %>% 
   filter(CHIP == "Yes") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -174,7 +90,7 @@ table1 <- data %>%
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-table2 <- data %>% 
+table2 <- clinical %>% 
   filter(CHIP == "No") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -193,12 +109,12 @@ gt::gtsave(table, expand = 1, zoom = 2,
              "/Output/Table 1_Patient Population faceted by CHIP.pdf"))
 
 # CHIP in age, gender, race, ethnicity
-table1 <- data %>% 
+table1 <- clinical %>% 
   select(CHIP, Age, Gender, Race, Ethnicity) %>% 
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-table2 <- data %>% 
+table2 <- clinical %>% 
   select(CHPD, Age, Gender, Race, Ethnicity) %>% 
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
@@ -211,12 +127,12 @@ gt::gtsave(table, expand = 1, zoom = 2,
              "/Output/CHIP_CHPD in age, gender, race, ethnicity.pdf"))
 
 # CHIP in comorbidity ans mets
-table1 <- data %>% 
+table1 <- clinical %>% 
   select(CHIP, Smoking, Mets) %>% 
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-table2 <- data %>% 
+table2 <- clinical %>% 
   select(CHPD, Smoking, Mets) %>% 
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
@@ -228,12 +144,12 @@ gt::gtsave(table, expand = 1, zoom = 2,
              path, 
              "/Output/CHIP_CHPD in comorbidity ans mets.pdf"))
 
-table1 <- data %>% 
+table1 <- clinical %>% 
   select(CHIP, Age, CANCER) %>%
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-table2 <- data %>% 
+table2 <- clinical %>% 
   select(CHPD, Age, CANCER) %>%
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
@@ -246,7 +162,7 @@ gt::gtsave(table, expand = 1, zoom = 2,
              path, 
              "/Output/CHIP_CHPD in age and cancer.pdf"))
 
-table <- data %>% 
+table <- clinical %>% 
   select(CHIP, CHPD, CANCER) %>%
   tbl_summary(by= CANCER, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
