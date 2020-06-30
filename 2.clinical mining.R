@@ -126,9 +126,107 @@ venn.diagram(
   cat.dist = c(0.055, -0.07, 0.015),
   cat.cex = .7
   #ext.percent = 2,
+)
+venn.diagram(
+  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
+           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID)),
+           Cases = c(unique(clinical[clinical$Case_Control == "Cases",]$NGS_ID)),
+           Controls = c(unique(clinical[clinical$Case_Control == "Controls",]$NGS_ID))),
+  category.names = c("CHIP" , "CHPD", "Cases", "Controls"),
+  filename = 'Mutations presented by cases_control.png',
+  output=TRUE,
+  
+  # Output features
+  imagetype="png" ,
+  height = 700 , 
+  width = 700 , 
+  resolution = 300,
+  compression = "lzw",
+  
+  # Circles
+  main = "Mutations presented by cases_control",
+  main.pos = c(0.5, .9),
+  lwd = 2,
+  lty = 'blank',
+  fill = cividis(n=4),
+  margin = 0.07,
+  
+  # Numbers
+  cex = .5,
+  fontface = "bold",
+  fontfamily = "sans",
+  # cat.pos = c(0, 180, 0),
+  # cat.dist = c(0.055, -0.07, 0.015),
+  cat.cex = .7
+  #ext.percent = 2,
   
 )
-
+venn.diagram(
+  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
+           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID)),
+           Cases = c(unique(clinical[clinical$Case_Control == "Cases",]$NGS_ID))),
+  category.names = c("CHIP" , "CHPD", "Cases"),
+  filename = 'Mutations presented by cases.png',
+  output=TRUE,
+  
+  # Output features
+  imagetype="png" ,
+  height = 700 , 
+  width = 700 , 
+  resolution = 300,
+  compression = "lzw",
+  
+  # Circles
+  main = "Mutations presented by cases",
+  main.pos = c(0.5, .9),
+  lwd = 2,
+  lty = 'blank',
+  fill = cividis(n=3),
+  margin = 0.07,
+  
+  # Numbers
+  cex = .5,
+  fontface = "bold",
+  fontfamily = "sans",
+  # cat.pos = c(0, 180, 0),
+  # cat.dist = c(0.055, -0.07, 0.015),
+  cat.cex = .7
+  #ext.percent = 2,
+  
+)
+venn.diagram(
+  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
+           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID)),
+           Controls = c(unique(clinical[clinical$Case_Control == "Controls",]$NGS_ID))),
+  category.names = c("CHIP" , "CHPD", "Controls"),
+  filename = 'Mutations presented by control.png',
+  output=TRUE,
+  
+  # Output features
+  imagetype="png" ,
+  height = 700 , 
+  width = 700 , 
+  resolution = 300,
+  compression = "lzw",
+  
+  # Circles
+  main = "Mutations presented by control",
+  main.pos = c(0.5, .9),
+  lwd = 2,
+  lty = 'blank',
+  fill = cividis(n=3),
+  margin = 0.07,
+  
+  # Numbers
+  cex = .5,
+  fontface = "bold",
+  fontfamily = "sans",
+  # cat.pos = c(0, 180, 0),
+  # cat.dist = c(0.055, -0.07, 0.015),
+  cat.cex = .7
+  #ext.percent = 2,
+  
+)
 
 ############################################################################################## II ### Mutation mining----
 # Allelic Variant----
@@ -152,9 +250,6 @@ global_data.summary <- global_data %>%
     max = max(VAF, na.rm = TRUE)
   )
 
-ggplot(global_data.summary, aes(x=Case_Control, y= median, ymin = median-sd, ymax = median+sd)) +
-  geom_pointrange()
-
 ggplot(global_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF, color=Case_Control)) +
   geom_jitter(
     position = position_jitter(0.2), color = "darkgray"
@@ -165,7 +260,6 @@ ggplot(global_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF,
     data = global_data.summary
   )+
   stat_compare_means(label.x = 1.15, label.y = .52)
-
 
 table <- global_data %>% 
   group_by(Case_Control) %>% 
@@ -199,7 +293,7 @@ ggplot(global_data.summary, aes(x=Case_Control, y=median, fill=Case_Control)) +
   theme_minimal()
 
 # Genes----
-# Number/% of Patients with CHIP
+# Number mutations vs Case # Attention will count multiple if happens more than once in same patient
 global_data %>% filter(!is.na(GENE)) %>% group_by(Case_Control,GENE) %>% 
   summarise(count=n()) %>% 
   ggplot(aes(x=reorder(GENE, -count), y=count, fill = Case_Control)) +
@@ -214,13 +308,77 @@ global_data %>% filter(!is.na(GENE)) %>% group_by(Case_Control,GENE) %>%
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
   coord_flip()
 
-table(global_data$Case_Control)
-
-global_data %>% 
+global_data %>% filter(!is.na(Case_Control)) %>% 
   select(Case_Control, GENE) %>% 
-  tbl_summary(by=Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  tbl_summary(by=Case_Control) %>% 
   add_p() %>%
   add_n()
+
+# Number/% of Patients with CHIP # Count 1 type of mutation per patient
+global_data %>% 
+  distinct(NGS_ID, GENE, .keep_all = TRUE) %>% 
+  filter(!is.na(GENE)) %>% group_by(Case_Control,GENE) %>% 
+  summarise(count=n()) %>% 
+  ggplot(aes(x=reorder(GENE, -count), y=count, fill = Case_Control)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
+  coord_flip()
+
+global_data %>% 
+  distinct(NGS_ID, GENE, .keep_all = TRUE) %>% 
+  filter(!is.na(GENE)) %>% group_by(Case_Control,GENE) %>% 
+  summarise(count=n()) %>% 
+  mutate(percent=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=reorder(GENE, -percent), y=percent, fill = Case_Control)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
+  coord_flip()
+
+global_data %>% filter(!is.na(Case_Control)) %>% 
+  distinct(NGS_ID, GENE, .keep_all = TRUE) %>% 
+  select(Case_Control, GENE) %>% 
+  tbl_summary(by=Case_Control) %>% 
+  add_p() %>%
+  add_n()
+
+# CHIP vs GENE----
+global_data %>%
+  select(CHIP, GENE) %>% 
+  tbl_summary(by=CHIP) %>% 
+  add_p() %>%
+  add_n()
+
+global_data %>% 
+  filter(!is.na(GENE)) %>% group_by(CHIP,GENE) %>% 
+  summarise(count=n()) %>% 
+  mutate(percent=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=reorder(GENE, -percent), y=percent, fill = CHIP)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
+  coord_flip()
+
+global_data %>% 
+  filter(!is.na(GENE)) %>% group_by(CHIP,GENE) %>% 
+  summarise(count=n()) %>% 
+  ggplot(aes(x=reorder(GENE, -count), y=count, fill = CHIP)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
+  coord_flip()
+
+tbl <- as.data.frame(table(global_data$FUNCTION, global_data$GENE)) %>% 
+  pivot_wider(names_from = Var2, values_from = Freq)
+# write.csv(tbl, paste0(path, "/Output/Fonction type per gene.csv"))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ############################################################################################## III ### Clinical mining----
 
