@@ -1,0 +1,143 @@
+---
+title: "Report myelosuppresseion"
+author: "Christelle Colin-Leitzinger"
+date: "6/30/2020"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Data
+```{r, echo = TRUE}
+# Import library
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library(viridis)
+library(gtsummary)
+library(VennDiagram)
+
+#######################################################################################  I  ### Load data----
+path <- fs::path("","Volumes","Gillis_Research","Christelle Colin-Leitzinger", "CHIP_myelosuppression_M4M 2018")
+#---
+clinical <-
+  read_csv(paste0(path, "/data/CHIP_CRASH_data_for_stats_v05.csv"))
+CHIP_muts <- 
+  read_csv(paste0(path, "/data/all CH_myelosupp_muts_2018_wUNC.csv"))
+
+#######################################################################################  II  ### Data cleaning----
+# 1.1.Clinical----
+clinical <- clinical %>% 
+  mutate(Case_Control = factor(Case_Control, labels = c("Controls", "Cases"))) %>% 
+  mutate(Case_Control = factor(Case_Control, levels= c("Cases", "Controls"))) %>% 
+  mutate(CHIP = factor(CHIP, labels=c("No", "Yes"))) %>% 
+  mutate(CHPD= factor(CHPD, labels=c("No", "Yes"))) %>% 
+  mutate(Race = factor(Race, labels=c("White", "Other"))) %>% 
+  mutate(Gender = factor(Gender, labels = c("Male", "Female"))) %>% 
+  mutate(Smoking = factor(Smoking, labels=c("Never","Ever"))) %>% 
+  mutate(Mets = factor(Mets, labels=c("No", "Yes"))) %>% 
+  mutate(Neutro = factor(Neutro, labels=c("No", "Yes"))) %>% 
+  mutate(Anemia = factor(Anemia, labels=c("No", "Yes"))) %>% 
+  mutate(Thrombo = factor(Thrombo, labels=c("No", "Yes"))) %>% 
+  mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
+  mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes")))
+
+# 1.2.Mutations----
+unique_patient_in_mutation <- as.data.frame(unique(CHIP_muts$patient_id)) %>% 
+  `colnames<-` (c("patient_id"))
+CHIP_muts <- CHIP_muts %>% drop_na("DATA")
+# CHIP_muts <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
+#                    value.var = c("CHROM", "POS", "REF", "ALT", "GENE", "VARIANT_C", "VARIANT_P",
+#                                  "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "INFO",
+#                                  "FORMAT", "DATA"))
+CHIP_muts <- left_join(unique_patient_in_mutation, CHIP_muts, by = "patient_id")
+
+
+# Cleaning 
+rm(unique_patient_in_mutation)
+
+
+#######################################################################################  III  ### Data binding----
+global_data <- full_join(clinical[3:32], CHIP_muts, 
+                          by = c("NGS_ID" = "patient_id"))
+```
+The data uses the cohort M4M completed with patient in UNC. We have clinical information for `lenght(clinical$NGS_ID)`.  
+We also have mutation information on `lenght(unique(CHIP_muts$patient_id))`.  
+We are going to investigate the presence or absence of CHIP/CHPD in patient treated with chemotherapie and showing a myelosuppression.
+
+## CHIP/CHPD
+
+```{r, echo = TRUE}
+print(paste("This data have", dim(clinical)[2], "variables on", dim(clinical)[1], "patients.",
+            sum(str_detect(clinical$Case_Control,"Case")), "are cases,", sum(str_detect(clinical$Case_Control,"Control")), "are controls.
+            This differs a little from the previous presentation in 2018 as we had 44 cases and 87 controls."))
+clinical %>% group_by(Case_Control,CHIP) %>% 
+  summarise(count=n()) %>% 
+  mutate(perc=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=Case_Control, y= perc, fill=CHIP))+
+  geom_bar(stat="identity") +
+  labs(x = "", y = "percent", title = "Prevalence of CHIP") +
+  theme_minimal()+
+  geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
+  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(clinical$Case_Control, clinical$CHIP))[3]),
+           color = "black", size = 6, hjust = 0, vjust = 1)
+
+clinical %>% group_by(Case_Control,CHPD) %>% 
+  summarise(count=n()) %>% 
+  mutate(perc=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=Case_Control, y= perc, fill=CHPD))+
+  geom_bar(stat="identity") +
+  labs(x = "", y = "percent", title = "Prevalence of CHPD") +
+  theme_minimal()+
+  geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
+  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(clinical$Case_Control, clinical$CHPD))[3]),
+           color = "black", size = 6, hjust = 0, vjust = 1)
+```
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Mutations-Variant Allele Frequencies
+
+```{r, echo = TRUE}
+ggplot(global_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF, color=Case_Control)) +
+  geom_jitter(
+    position = position_jitter(0.2), color = "darkgray"
+  ) + 
+  theme_minimal()+
+  geom_pointrange(
+    aes(ymin = median-sd, ymax = median+sd),
+    data = global_data.summary
+  )+
+  stat_compare_means(label.x = 1.15, label.y = .52)
+
+global_data %>% 
+  group_by(Case_Control) %>% 
+  filter(!is.na(VAF)) %>% 
+  select(Case_Control, VAF) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>% add_overall()
+
+ggplot(global_data.summary, aes(x=Case_Control, y=median, fill=Case_Control)) +
+  geom_bar(stat = "identity")+
+  geom_errorbar(aes(ymin = median, ymax = median+sd, color=Case_Control))+
+  theme_minimal()
+```
+
+## Slide with Plot
+
+```{r, echo = TRUE}
+global_data %>% 
+  group_by(Case_Control) %>% 
+  filter(!is.na(VAF)) %>% 
+  select(Case_Control, VAF) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>% add_overall()
+```
+
