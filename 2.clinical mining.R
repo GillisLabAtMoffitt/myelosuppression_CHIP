@@ -37,27 +37,27 @@ clinical %>% group_by(Case_Control,CHPD) %>%
            color = "black", size = 6, hjust = 0, vjust = 1)
 # dev.off()
 
-table <- clinical %>% 
+tbl <- clinical %>% 
   select(Case_Control, CHIP, CHPD) %>% 
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall() %>% as_gt()
-gt::gtsave(table, expand = 1, zoom = 2, 
+gt::gtsave(tbl, expand = 1, zoom = 2, 
            paste0(
              path, 
              "/Output/CHIP and CHPD in Case_Control.pdf"))
-table <- clinical %>% 
+tbl <- clinical %>% 
   select(Case_Control, CHIP) %>% 
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% as_gt()
-gt::gtsave(table, expand = 1, zoom = 2, 
+gt::gtsave(tbl, expand = 1, zoom = 2, 
            paste0(
              path, 
              "/Output/CHIP and CHPD in Case_Control.pdf"))
-table <- clinical %>% 
+tbl <- clinical %>% 
   select(Case_Control, CHPD) %>% 
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% as_gt()
-gt::gtsave(table, expand = 1, zoom = 2, 
+gt::gtsave(tbl, expand = 1, zoom = 2, 
            paste0(
              path, 
              "/Output/CHIP and CHPD in Case_Control.pdf"))
@@ -252,7 +252,7 @@ global_data.summary <- global_data %>%
 
 ggplot(global_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF, color=Case_Control)) +
   geom_jitter(
-    position = position_jitter(0.2), color = "darkgray"
+    position = position_jitter(0.2), color = "gray"
   ) + 
   theme_minimal()+
   geom_pointrange(
@@ -261,13 +261,13 @@ ggplot(global_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF,
   )+
   stat_compare_means(label.x = 1.15, label.y = .52)
 
-table <- global_data %>% 
+tbl <- global_data %>% 
   group_by(Case_Control) %>% 
   filter(!is.na(VAF)) %>% 
   select(Case_Control, VAF) %>% 
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall() %>% as_gt()
-gt::gtsave(table, expand = 1, zoom = 2, 
+gt::gtsave(tbl, expand = 1, zoom = 2, 
            paste0(
              path, 
              "/Output/VAF in Case_Control.pdf"))
@@ -363,7 +363,7 @@ global_data %>%
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
   coord_flip()
 
-tbl <- as.data.frame(table(global_data$FUNCTION, global_data$GENE)) %>% 
+as.data.frame(table(global_data$FUNCTION, global_data$GENE)) %>% 
   pivot_wider(names_from = Var2, values_from = Freq)
 # write.csv(tbl, paste0(path, "/Output/Fonction type per gene.csv"))
 
@@ -463,6 +463,191 @@ ggplot(data = clinical, aes(x=Smoking, y=Age), fill=Smoking) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
   facet_grid(. ~ CHIP)
 # dev.off()
+
+tbl1 <- clinical %>% filter(CHIP == "CHIP") %>% 
+  select(Age, Race) %>% 
+  tbl_summary(by=Race, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Race")) %>% 
+  add_p() %>% add_overall()
+tbl2 <- clinical %>% filter(CHIP == "No CHIP") %>% 
+  select(Age, Race) %>% 
+  tbl_summary(by=Race, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Race")) %>% 
+  add_p() %>% add_overall()
+tblm1 <- tbl_merge(list(tbl1, tbl2),
+          tab_spanner = c("**CHIP**", "**no CHIP**")) %>%
+  bold_labels() %>%
+  italicize_levels()
+
+tbl1 <- clinical %>% filter(CHIP == "CHIP") %>% 
+  select(Age, Ethnicity) %>% 
+  tbl_summary(by=Ethnicity, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Ethnicity")) %>% 
+  add_p() %>% add_overall()
+tbl2 <- clinical %>% filter(CHIP == "No CHIP") %>% 
+  select(Age, Ethnicity) %>% 
+  tbl_summary(by=Ethnicity, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Ethnicity")) %>% 
+  add_p() %>% add_overall()
+tblm2 <- tbl_merge(list(tbl1, tbl2),
+         tab_spanner = c("**CHIPe**", "**no CHIP**")) %>%
+  bold_labels() %>%
+  italicize_levels()
+
+tbl1 <- clinical %>%filter(CHIP == "CHIP") %>% 
+  select(Age, Smoking) %>% 
+  tbl_summary(by=Smoking, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Smoking")) %>% 
+  add_p() %>% add_overall()
+tbl2 <- clinical %>%filter(CHIP == "No CHIP") %>% 
+  select(Age, Smoking) %>% 
+  tbl_summary(by=Smoking, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Smoking")) %>% 
+  add_p() %>% add_overall()
+tblm3 <- tbl_merge(list(tbl1, tbl2),
+        tab_spanner = c("**CHIPs**", "**no CHIP**")) %>%
+  bold_labels() %>%
+  italicize_levels()
+tbl <- tbl_stack(list(tblm1, tblm2, tblm3))
+
+# pdf(paste0(path, "/Output/Metastasis.pdf"))
+ggplot(data = clinical, aes(x=Mets, y=Age), fill=Mets) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x="Mets", y="Age", title="Age repartition") +
+  geom_jitter(shape=16, position=position_jitter(0.2)) +
+  facet_grid(. ~ CHIP)
+# dev.off()
+clinical %>%
+  select(Age, Mets) %>% 
+  tbl_summary(by=Mets, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>% add_overall()
+
+clinical %>%
+  select(CHIP, Mets) %>% 
+  tbl_summary(by=CHIP) %>% 
+  add_p() %>% add_overall()
+
+
+# Table 1_Patient Population----
+# Case_Control
+tbl <- clinical %>% 
+  select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
+         BaseANC, BaseHGB, BasePLT, BaseWBC,
+         ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
+         Prior_chemo, Prior_rad, 
+         MAX2, MAX2heme
+  ) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n() %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 2, 
+           paste0(
+             path, 
+             "/Output/Table 1_Patient Population.pdf"))
+
+# CHIP
+tbl <- clinical %>% 
+  select(CHIP, Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
+         BaseANC, BaseHGB, BasePLT, BaseWBC,
+         ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
+         Prior_chemo, Prior_rad, 
+         MAX2, MAX2heme
+  ) %>% 
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n() %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 2, 
+           paste0(
+             path, 
+             "/Output/Table 2_CHIP vs no CHIP.pdf"))
+# Combined
+tbl1 <- clinical %>% 
+  filter(CHIP == "CHIP") %>% 
+  select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
+         BaseANC, BaseHGB, BasePLT, BaseWBC,
+         ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
+         Prior_chemo, Prior_rad, 
+         MAX2, MAX2heme
+  ) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl2 <- clinical %>% 
+  filter(CHIP == "No CHIP") %>% 
+  select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
+         BaseANC, BaseHGB, BasePLT, BaseWBC,
+         ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
+         Prior_chemo, Prior_rad, 
+         MAX2, MAX2heme
+  ) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl <- tbl_merge(list(tbl1, tbl2),
+                 tab_spanner = c("**CHIP**", "**no CHIP**"))  %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 2, 
+           paste0(
+             path, 
+             "/Output/Table 1_Patient Population faceted by CHIP.pdf"))
+
+
+# CHIP in age, gender, race, ethnicity
+tbl1 <- clinical %>% 
+  select(CHIP, Age, Gender, Race, Ethnicity) %>% 
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl2 <- clinical %>% 
+  select(CHPD, Age, Gender, Race, Ethnicity) %>% 
+  tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl <- tbl_merge(list(tbl1, tbl2),
+                   tab_spanner = c("**CHIP**", "**CHPD**"))  %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 2, 
+           paste0(
+             path, 
+             "/Output/CHIP_CHPD in age, gender, race, ethnicity.pdf"))
+
+# CHIP in comorbidity ans mets
+tbl1 <- clinical %>% 
+  select(CHIP, Smoking, Mets) %>% 
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl2 <- clinical %>% 
+  select(CHPD, Smoking, Mets) %>% 
+  tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl <- tbl_merge(list(tbl1, tbl2),
+                   tab_spanner = c("**CHIP**", "**CHPD**"))  %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 2, 
+           paste0(
+             path, 
+             "/Output/CHIP_CHPD in comorbidity ans mets.pdf"))
+
+tbl1 <- clinical %>% 
+  select(CHIP, Age, CANCER) %>%
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl2 <- clinical %>% 
+  select(CHPD, Age, CANCER) %>%
+  tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
+tbl <- tbl_merge(list(tbl1, tbl2),
+                   tab_spanner = c("**CHIP**", "**CHPD**"))  %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 2, 
+           paste0(
+             path, 
+             "/Output/CHIP_CHPD in age and cancer.pdf"))
+
+tbl <- clinical %>% 
+  select(CHIP, CHPD, CANCER) %>%
+  tbl_summary(by= CANCER, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n() %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 2, 
+           paste0(
+             path, 
+             "/Output/CHIP_CHPD in cancer.pdf"))
 
 
 
