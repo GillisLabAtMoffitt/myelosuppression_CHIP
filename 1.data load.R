@@ -21,7 +21,7 @@ clinical <- clinical %>%
   mutate(Case_Control = factor(Case_Control, labels = c("Controls", "Cases"))) %>% 
   mutate(Case_Control = factor(Case_Control, levels= c("Cases", "Controls"))) %>% 
   mutate(CHIP = factor(CHIP, labels=c("No CHIP", "CHIP"))) %>% 
-  mutate(CHPD= factor(CHPD, labels=c("No", "Yes"))) %>% 
+  mutate(CHPD= factor(CHPD, labels=c("No CHPD", "CHPD"))) %>% 
   mutate(Race = factor(Race, labels=c("White", "Other"))) %>% 
   mutate(Gender = factor(Gender, labels = c("Male", "Female"))) %>% 
   mutate(Smoking = factor(Smoking, labels=c("Never","Ever"))) %>% 
@@ -31,21 +31,8 @@ clinical <- clinical %>%
   mutate(Thrombo = factor(Thrombo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes"))) %>%
-  filter(Cohort == "M4M")# remove later
-
-# 1.2.Mutations----
-unique_patient_in_mutation <- as.data.frame(unique(CHIP_muts$patient_id)) %>% 
-  `colnames<-` (c("patient_id"))
-CHIP_muts <- CHIP_muts %>% drop_na("DATA")
-# CHIP_muts <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
-#                    value.var = c("CHROM", "POS", "REF", "ALT", "GENE", "VARIANT_C", "VARIANT_P",
-#                                  "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "INFO",
-#                                  "FORMAT", "DATA"))
-CHIP_muts <- left_join(unique_patient_in_mutation, CHIP_muts, by = "patient_id")
-
-
-# Cleaning 
-rm(unique_patient_in_mutation)
+  filter(Cohort == "M4M") %>% # remove later
+  select(-X32)
 
 
 #######################################################################################  III  ### Data binding----
@@ -53,9 +40,5 @@ global_data <- full_join(clinical[3:31], CHIP_muts,
                           by = c("NGS_ID" = "patient_id")) %>% 
   filter(str_detect(NGS_ID, "M4M"))# remove later
 
-
-
-
-
-
+write_csv(global_data, paste0(path, "/Output/global_data.csv"))
 
