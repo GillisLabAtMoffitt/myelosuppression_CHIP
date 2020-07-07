@@ -53,7 +53,7 @@ muts_data <- full_join(clinical[3:31], CHIP_muts,
                           by = c("NGS_ID" = "patient_id")) %>% 
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "old_CHPD", "CHIP", everything())
-
+write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
 
 # 3.2.Bind to have 1 patient per row, multiple mutation per row----
 CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
@@ -66,7 +66,7 @@ global_data <- left_join(clinical[3:31], CHIP_muts1,
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "old_CHPD", "CHIP", everything())
 
-write_csv(global_data, paste0(path, "/Output/global_data.csv"))
+write_csv(global_data, paste0(path, "/Output/data output/global_data.csv"))
 
 
 
