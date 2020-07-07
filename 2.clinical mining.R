@@ -1,13 +1,13 @@
-############################################################################################## I ### Clinical mining----
-print(paste("This data have", dim(clinical)[2], "variables on", dim(clinical)[1], "patients.",
-            sum(str_detect(clinical$Case_Control,"Case")), "are cases,", sum(str_detect(clinical$Case_Control,"Control")), "are controls.
-            This differs a little from the previous presentation in 2018 as we had 44 cases and 87 controls."))
+############################################################################################## I ### global_data mining----
+print(paste("This data have", dim(global_data)[2], "variables on", dim(global_data)[1], "patients.",
+            sum(str_detect(global_data$Case_Control,"Cases")), "are cases,", sum(str_detect(global_data$Case_Control,"Controls")), "are controls.
+            In 2018 as we had 44 cases and 87 controls."))
 
 ############################################################################################## I ### CHIP----
 
 # 1.1 CHIP prevalence----
 # pdf(paste0(path, "/Output/CHIP prevalence.pdf"))
-clinical %>% group_by(Case_Control,CHIP) %>% 
+global_data %>% group_by(Case_Control,CHIP) %>% 
   summarise(count=n()) %>% 
   mutate(perc=(count/sum(count)*100)
   ) %>% 
@@ -17,13 +17,13 @@ clinical %>% group_by(Case_Control,CHIP) %>%
   theme_minimal()+
   geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
   geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
-  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(clinical$Case_Control, clinical$CHIP))[3]),
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_data$Case_Control, global_data$CHIP))[3]),
            color = "black", size = 6, hjust = 0, vjust = 1)
 # dev.off()
 
 # CHPD prevalence
 # pdf(paste0(path, "/Output/CHPD prevalence.pdf"))
-clinical %>% group_by(Case_Control,CHPD) %>% 
+global_data %>% group_by(Case_Control,CHPD) %>% 
   summarise(count=n()) %>% 
   mutate(perc=(count/sum(count)*100)
   ) %>% 
@@ -33,11 +33,11 @@ clinical %>% group_by(Case_Control,CHPD) %>%
   theme_minimal()+
   geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
   geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
-  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(clinical$Case_Control, clinical$CHPD))[3]),
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_data$Case_Control, global_data$CHPD))[3]),
            color = "black", size = 6, hjust = 0, vjust = 1)
 # dev.off()
 
-tbl <- clinical %>% 
+tbl <- global_data %>% 
   select(Case_Control, CHIP, CHPD) %>% 
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall() %>% as_gt()
@@ -45,7 +45,7 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
            paste0(
              path, 
              "/Output/CHIP and CHPD in Case_Control.pdf"))
-tbl <- clinical %>% 
+tbl <- global_data %>% 
   select(Case_Control, CHIP) %>% 
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% as_gt()
@@ -53,7 +53,7 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
            paste0(
              path, 
              "/Output/CHIP and CHPD in Case_Control.pdf"))
-tbl <- clinical %>% 
+tbl <- global_data %>% 
   select(Case_Control, CHPD) %>% 
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% as_gt()
@@ -61,15 +61,15 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
            paste0(
              path, 
              "/Output/CHIP and CHPD in Case_Control.pdf"))
-chisq.test(table(clinical$Case_Control, clinical$CHIP))
-chisq.test(table(clinical$Case_Control, clinical$CHIP))$residuals
-chisq.test(table(clinical$Case_Control, clinical$CHPD))
-chisq.test(table(clinical$Case_Control, clinical$CHPD))$residuals
+chisq.test(table(global_data$Case_Control, global_data$CHIP))
+chisq.test(table(global_data$Case_Control, global_data$CHIP))$residuals
+chisq.test(table(global_data$Case_Control, global_data$CHPD))
+chisq.test(table(global_data$Case_Control, global_data$CHPD))$residuals
 
 # CHIP vs CHPD
 venn.diagram(
-  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
-           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID))),
+  x = list(CHIP = c(unique(global_data[global_data$CHIP == "CHIP",]$NGS_ID)),
+           CHPD = c(unique(global_data[global_data$CHPD == "CHPD",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD"),
   filename = 'Patients exhibiting CHIP vs CHPD.png',
   output=TRUE,
@@ -96,9 +96,9 @@ venn.diagram(
   cat.dist = c(0.025, -0.08)
 )
 venn.diagram(
-  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
-           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID)),
-           CHIPno = c(unique(clinical[clinical$CHIP == "No",]$NGS_ID))),
+  x = list(CHIP = c(unique(global_data[global_data$CHIP == "CHIP",]$NGS_ID)),
+           CHPD = c(unique(global_data[global_data$CHPD == "CHPD",]$NGS_ID)),
+           CHIPno = c(unique(global_data[global_data$CHIP == "No CHIP",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD", "none"),
   filename = 'Mutations presented by patients.png',
   output=TRUE,
@@ -128,10 +128,10 @@ venn.diagram(
   #ext.percent = 2,
 )
 venn.diagram(
-  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
-           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID)),
-           Cases = c(unique(clinical[clinical$Case_Control == "Cases",]$NGS_ID)),
-           Controls = c(unique(clinical[clinical$Case_Control == "Controls",]$NGS_ID))),
+  x = list(CHIP = c(unique(global_data[global_data$CHIP == "CHIP",]$NGS_ID)),
+           CHPD = c(unique(global_data[global_data$CHPD == "CHPD",]$NGS_ID)),
+           Cases = c(unique(global_data[global_data$Case_Control == "Cases",]$NGS_ID)),
+           Controls = c(unique(global_data[global_data$Case_Control == "Controls",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD", "Cases", "Controls"),
   filename = 'Mutations presented by cases_control.png',
   output=TRUE,
@@ -162,9 +162,9 @@ venn.diagram(
   
 )
 venn.diagram(
-  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
-           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID)),
-           Cases = c(unique(clinical[clinical$Case_Control == "Cases",]$NGS_ID))),
+  x = list(CHIP = c(unique(global_data[global_data$CHIP == "CHIP",]$NGS_ID)),
+           CHPD = c(unique(global_data[global_data$CHPD == "CHPD",]$NGS_ID)),
+           Cases = c(unique(global_data[global_data$Case_Control == "Cases",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD", "Cases"),
   filename = 'Mutations presented by cases.png',
   output=TRUE,
@@ -195,9 +195,9 @@ venn.diagram(
   
 )
 venn.diagram(
-  x = list(CHIP = c(unique(clinical[clinical$CHIP == "Yes",]$NGS_ID)),
-           CHPD = c(unique(clinical[clinical$CHPD == "Yes",]$NGS_ID)),
-           Controls = c(unique(clinical[clinical$Case_Control == "Controls",]$NGS_ID))),
+  x = list(CHIP = c(unique(global_data[global_data$CHIP == "CHIP",]$NGS_ID)),
+           CHPD = c(unique(global_data[global_data$CHPD == "CHPD",]$NGS_ID)),
+           Controls = c(unique(global_data[global_data$Case_Control == "Controls",]$NGS_ID))),
   category.names = c("CHIP" , "CHPD", "Controls"),
   filename = 'Mutations presented by control.png',
   output=TRUE,
@@ -272,15 +272,15 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
              path, 
              "/Output/VAF in Case_Control.pdf"))
 
-ggplot(global_data, aes(x=Case_Control, y= VAF))+
-  geom_dotplot(
-    binaxis = "y", stackdir = "center",
-    color = "lightgray"
-  ) + 
-  stat_summary(
-    fun.data = "mean_sdl", fun.args = list(mult=1), 
-    geom = "pointrange", color = "red"
-  )
+# ggplot(global_data, aes(x=Case_Control, y= VAF))+
+#   geom_dotplot(
+#     binaxis = "y", stackdir = "center",
+#     color = "lightgray"
+#   ) + 
+#   stat_summary(
+#     fun.data = "mean_sdl", fun.args = list(mult=1), 
+#     geom = "pointrange", color = "red"
+#   )
 
 # Barplot
 ggplot(global_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y=VAF, fill=Case_Control)) +
@@ -371,7 +371,7 @@ as.data.frame(table(global_data$FUNCTION, global_data$GENE)) %>%
 ############################################################################################## III ### Clinical mining----
 
 # Cancer repartition pie ----
-tbl <- as.data.frame(table(clinical$CANCER))
+tbl <- as.data.frame(table(global_data$CANCER))
 colourCount = length(unique(tbl$Var1))
 getPalette = colorRampPalette(RColorBrewer::brewer.pal(8, "Accent"))(colourCount)
 # pdf(paste0(path, "/Output/Cancer repartition.pdf"))
@@ -395,7 +395,7 @@ tbl %>% mutate(Var2 = fct_reorder(Var2, desc(Freq))) %>%
 
 # Age
 # pdf(paste0(path, "/Output/Age repartition.pdf"))
-qplot(x =Age, data=clinical, fill=..count.., geom="histogram")+
+qplot(x =Age, data=global_data, fill=..count.., geom="histogram")+
   scale_fill_viridis_c(
     alpha = 1,
     begin = 0,
@@ -413,14 +413,14 @@ qplot(x =Age, data=clinical, fill=..count.., geom="histogram")+
 # dev.off()
 
 # pdf(paste0(path, "/Output/Age.pdf")) # Age per cancer
-ggplot(data = clinical, aes(x=CANCER, y=Age), fill=CANCER) +
+ggplot(data = global_data, aes(x=CANCER, y=Age), fill=CANCER) +
   geom_boxplot(color= magma(n=22)) +
   theme_minimal() +
   labs(x="Cancer type", y="Age", title="Age repartition per cancer") +
   coord_flip() +
   geom_jitter(shape=16, position=position_jitter(0.2))
 # dev.off()
-ggplot(data = clinical, aes(x=CANCER, y=Age), fill=CANCER) +
+ggplot(data = global_data, aes(x=CANCER, y=Age), fill=CANCER) +
   geom_boxplot(color= magma(n=32)) +
   theme_minimal() +
   labs(x="Cancer type", y="Age", title="Age repartition per cancer") +
@@ -429,7 +429,7 @@ ggplot(data = clinical, aes(x=CANCER, y=Age), fill=CANCER) +
   facet_grid(rows = vars(CHIP))
 
 # pdf(paste0(path, "/Output/Gender.pdf"))
-ggplot(data = clinical, aes(x=Gender, y=Age), fill=Gender) +
+ggplot(data = global_data, aes(x=Gender, y=Age), fill=Gender) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Gender", y="Age", title="Age repartition") +
@@ -438,7 +438,7 @@ ggplot(data = clinical, aes(x=Gender, y=Age), fill=Gender) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Race.pdf"))
-ggplot(data = clinical, aes(x=Race, y=Age), fill=Race) +
+ggplot(data = global_data, aes(x=Race, y=Age), fill=Race) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Race", y="Age", title="Age repartition") +
@@ -447,7 +447,7 @@ ggplot(data = clinical, aes(x=Race, y=Age), fill=Race) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Ethnicity.pdf"))
-ggplot(data = clinical, aes(x=Ethnicity, y=Age), fill=Ethnicity) +
+ggplot(data = global_data, aes(x=Ethnicity, y=Age), fill=Ethnicity) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Ethnicity", y="Age", title="Age repartition") +
@@ -456,7 +456,7 @@ ggplot(data = clinical, aes(x=Ethnicity, y=Age), fill=Ethnicity) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Smoking.pdf"))
-ggplot(data = clinical, aes(x=Smoking, y=Age), fill=Smoking) +
+ggplot(data = global_data, aes(x=Smoking, y=Age), fill=Smoking) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Smoking", y="Age", title="Age repartition") +
@@ -464,11 +464,11 @@ ggplot(data = clinical, aes(x=Smoking, y=Age), fill=Smoking) +
   facet_grid(. ~ CHIP)
 # dev.off()
 
-tbl1 <- clinical %>% filter(CHIP == "CHIP") %>% 
+tbl1 <- global_data %>% filter(CHIP == "CHIP") %>% 
   select(Age, Race) %>% 
   tbl_summary(by=Race, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Race")) %>% 
   add_p() %>% add_overall()
-tbl2 <- clinical %>% filter(CHIP == "No CHIP") %>% 
+tbl2 <- global_data %>% filter(CHIP == "No CHIP") %>% 
   select(Age, Race) %>% 
   tbl_summary(by=Race, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Race")) %>% 
   add_p() %>% add_overall()
@@ -477,11 +477,11 @@ tblm1 <- tbl_merge(list(tbl1, tbl2),
   bold_labels() %>%
   italicize_levels()
 
-tbl1 <- clinical %>% filter(CHIP == "CHIP") %>% 
+tbl1 <- global_data %>% filter(CHIP == "CHIP") %>% 
   select(Age, Ethnicity) %>% 
   tbl_summary(by=Ethnicity, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Ethnicity")) %>% 
   add_p() %>% add_overall()
-tbl2 <- clinical %>% filter(CHIP == "No CHIP") %>% 
+tbl2 <- global_data %>% filter(CHIP == "No CHIP") %>% 
   select(Age, Ethnicity) %>% 
   tbl_summary(by=Ethnicity, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Ethnicity")) %>% 
   add_p() %>% add_overall()
@@ -490,11 +490,11 @@ tblm2 <- tbl_merge(list(tbl1, tbl2),
   bold_labels() %>%
   italicize_levels()
 
-tbl1 <- clinical %>%filter(CHIP == "CHIP") %>% 
+tbl1 <- global_data %>%filter(CHIP == "CHIP") %>% 
   select(Age, Smoking) %>% 
   tbl_summary(by=Smoking, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Smoking")) %>% 
   add_p() %>% add_overall()
-tbl2 <- clinical %>%filter(CHIP == "No CHIP") %>% 
+tbl2 <- global_data %>%filter(CHIP == "No CHIP") %>% 
   select(Age, Smoking) %>% 
   tbl_summary(by=Smoking, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Smoking")) %>% 
   add_p() %>% add_overall()
@@ -505,19 +505,19 @@ tblm3 <- tbl_merge(list(tbl1, tbl2),
 tbl <- tbl_stack(list(tblm1, tblm2, tblm3))
 
 # pdf(paste0(path, "/Output/Metastasis.pdf"))
-ggplot(data = clinical, aes(x=Mets, y=Age), fill=Mets) +
+ggplot(data = global_data, aes(x=Mets, y=Age), fill=Mets) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Mets", y="Age", title="Age repartition") +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
   facet_grid(. ~ CHIP)
 # dev.off()
-clinical %>%
+global_data %>%
   select(Age, Mets) %>% 
   tbl_summary(by=Mets, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall()
 
-clinical %>%
+global_data %>%
   select(CHIP, Mets) %>% 
   tbl_summary(by=CHIP) %>% 
   add_p() %>% add_overall()
@@ -525,7 +525,7 @@ clinical %>%
 
 # Table 1_Patient Population----
 # Case_Control
-tbl <- clinical %>% 
+tbl <- global_data %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
          ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
@@ -541,7 +541,7 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
              "/Output/Table 1_Patient Population.pdf"))
 
 # CHIP
-tbl <- clinical %>% 
+tbl <- global_data %>% 
   select(CHIP, Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
          ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
@@ -556,7 +556,7 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
              path, 
              "/Output/Table 2_CHIP vs no CHIP.pdf"))
 # Combined
-tbl1 <- clinical %>% 
+tbl1 <- global_data %>% 
   filter(CHIP == "CHIP") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -567,7 +567,7 @@ tbl1 <- clinical %>%
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-tbl2 <- clinical %>% 
+tbl2 <- global_data %>% 
   filter(CHIP == "No CHIP") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -587,12 +587,12 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
 
 
 # CHIP in age, gender, race, ethnicity
-tbl1 <- clinical %>% 
+tbl1 <- global_data %>% 
   select(CHIP, Age, Gender, Race, Ethnicity) %>% 
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-tbl2 <- clinical %>% 
+tbl2 <- global_data %>% 
   select(CHPD, Age, Gender, Race, Ethnicity) %>% 
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
@@ -605,12 +605,12 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
              "/Output/CHIP_CHPD in age, gender, race, ethnicity.pdf"))
 
 # CHIP in comorbidity ans mets
-tbl1 <- clinical %>% 
+tbl1 <- global_data %>% 
   select(CHIP, Smoking, Mets) %>% 
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-tbl2 <- clinical %>% 
+tbl2 <- global_data %>% 
   select(CHPD, Smoking, Mets) %>% 
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
@@ -622,12 +622,12 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
              path, 
              "/Output/CHIP_CHPD in comorbidity ans mets.pdf"))
 
-tbl1 <- clinical %>% 
+tbl1 <- global_data %>% 
   select(CHIP, Age, CANCER) %>%
   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-tbl2 <- clinical %>% 
+tbl2 <- global_data %>% 
   select(CHPD, Age, CANCER) %>%
   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
@@ -639,7 +639,7 @@ gt::gtsave(tbl, expand = 1, zoom = 2,
              path, 
              "/Output/CHIP_CHPD in age and cancer.pdf"))
 
-tbl <- clinical %>% 
+tbl <- global_data %>% 
   select(CHIP, CHPD, CANCER) %>%
   tbl_summary(by= CANCER, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
