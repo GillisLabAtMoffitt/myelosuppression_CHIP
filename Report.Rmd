@@ -6,8 +6,16 @@ output: powerpoint_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE,
+                      cache = FALSE,
+                      fig.width = 10, fig.height = 7)
 ```
+<br>
+
+# Report
+***
 
 ## Data
 ```{r, echo = TRUE}
@@ -25,15 +33,15 @@ path <- fs::path("","Volumes","Gillis_Research","Christelle Colin-Leitzinger", "
 clinical <-
   read_csv(paste0(path, "/data/CHIP_CRASH_data_for_stats_v05.csv"))
 CHIP_muts <- 
-  read_csv(paste0(path, "/data/all CH_myelosupp_muts_2018_wUNC.csv"))
+  read_csv(paste0(path, "/data/cleaned CH_myelosupp_muts_2020_CC.csv"))
 
 #######################################################################################  II  ### Data cleaning----
 # 1.1.Clinical----
 clinical <- clinical %>% 
   mutate(Case_Control = factor(Case_Control, labels = c("Controls", "Cases"))) %>% 
   mutate(Case_Control = factor(Case_Control, levels= c("Cases", "Controls"))) %>% 
-  mutate(CHIP = factor(CHIP, labels=c("No", "Yes"))) %>% 
-  mutate(CHPD= factor(CHPD, labels=c("No", "Yes"))) %>% 
+  mutate(CHIP = factor(CHIP, labels=c("No CHIP", "CHIP"))) %>% 
+  mutate(CHPD= factor(CHPD, labels=c("No CHPD", "CHPD"))) %>% 
   mutate(Race = factor(Race, labels=c("White", "Other"))) %>% 
   mutate(Gender = factor(Gender, labels = c("Male", "Female"))) %>% 
   mutate(Smoking = factor(Smoking, labels=c("Never","Ever"))) %>% 
@@ -42,7 +50,9 @@ clinical <- clinical %>%
   mutate(Anemia = factor(Anemia, labels=c("No", "Yes"))) %>% 
   mutate(Thrombo = factor(Thrombo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
-  mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes")))
+  mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes"))) %>%
+  filter(Cohort == "M4M") %>% 
+  select(-X32)
 
 # 1.2.Mutations----
 unique_patient_in_mutation <- as.data.frame(unique(CHIP_muts$patient_id)) %>% 
@@ -60,7 +70,7 @@ rm(unique_patient_in_mutation)
 
 
 #######################################################################################  III  ### Data binding----
-global_data <- full_join(clinical[3:32], CHIP_muts, 
+global_data <- full_join(clinical[3:31], CHIP_muts, 
                           by = c("NGS_ID" = "patient_id"))
 ```
 The data uses the cohort M4M completed with patient in UNC. We have clinical information for `lenght(clinical$NGS_ID)`.  

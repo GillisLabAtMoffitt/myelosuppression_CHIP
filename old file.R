@@ -27,7 +27,7 @@ clinical <- clinical %>%
   mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes")))
 
-global_data <- full_join(clinical[3:32], CHIP_muts, 
+global_data <- full_join(clinical[3:31], CHIP_muts, 
                          by = c("NGS_ID" = "patient_id")) %>% 
   filter(str_detect(NGS_ID, "M4M"))
 
