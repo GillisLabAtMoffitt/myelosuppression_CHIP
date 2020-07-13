@@ -6,6 +6,7 @@ library(viridis)
 library(gtsummary)
 library(VennDiagram)
 library(ggpubr)
+library(survival)
 
 #######################################################################################  I  ### Load data----
 path <- fs::path("","Volumes","Gillis_Research","Christelle Colin-Leitzinger", "CHIP_myelosuppression_M4M 2018")
@@ -15,11 +16,13 @@ clinical <-
   rename(old_CHIP = CHIP, old_CHPD = CHPD) %>% 
   select(-X32)
 
-CHIP_muts <- 
+CHIP_muts1 <- 
   read_csv(paste0(path, "/data/cleaned CH_myelosupp_muts_2020_CC.csv"))
+CHIP_muts <- 
+  read.delim(paste0(path, "/data/M4M2018_updated 06.24.20_filtered.txt"))
 
 #######################################################################################  II  ### Data cleaning----
-# 1.1.Clinical----
+# 2.1.Clinical data----
 clinical <- clinical %>% 
   mutate(Case_Control = factor(Case_Control, labels = c("Cases", "Controls"), levels= c(1, 0))) %>% # 0 = ctrl
   # mutate(Case_Control = factor(Case_Control, labels= c("Controls", "Cases"))) %>% 
@@ -36,14 +39,19 @@ clinical <- clinical %>%
   mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes"))) %>%
   filter(Cohort == "M4M") # remove later
 
+# 2.2.CHIP data----
+CHIP_muts <- full_join(CHIP_muts1 %>% 
+                         select(patient_id),
+                       CHIP_muts, 
+                       by = "patient_id")
+
 # Modified CHIP var to fit with the new data
 CHIP_muts <- CHIP_muts %>% 
   mutate(CHIP = case_when(
-    is.na(DATA) ~ "No CHIP",
-    !is.na(DATA) ~ "CHIP"
+    is.na(DATA) ~ 0,
+    !is.na(DATA) ~ 1
   )) %>% 
-  mutate(CHIP = factor(CHIP, levels= c("No CHIP", "CHIP")))
-  
+  mutate(CHIP = factor(CHIP, labels= c("CHIP", "No CHIP"), levels= c(1, 0)))
 
 #######################################################################################  III  ### Data binding----
 # Will bind the 2 data but in 2 different ways 
@@ -53,7 +61,7 @@ muts_data <- full_join(clinical[3:31], CHIP_muts,
                           by = c("NGS_ID" = "patient_id")) %>%
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
-write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
+# write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
 
 # 3.2.Bind to have 1 patient per row, multiple mutation per row----
 CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
@@ -66,15 +74,6 @@ global_data <- left_join(clinical[, c(1,3:31)], CHIP_muts1,
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("Patient", "NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
 
-write_csv(global_data, paste0(path, "/Output/data output/global_data.csv"))
+# write_csv(global_data, paste0(path, "/Output/data output/global_data.csv"))
 
-
-
-
-
-
-
-
-
-
-
+rm(CHIP_muts1)
