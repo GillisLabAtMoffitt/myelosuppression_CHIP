@@ -278,7 +278,8 @@ muts_data.summary <- muts_data %>%
     VAF = mean(VAF, na.rm = TRUE),
     median = median(VAF, na.rm = TRUE),
     min = min(VAF, na.rm = TRUE),
-    max = max(VAF, na.rm = TRUE)
+    max = max(VAF, na.rm = TRUE),
+    mean = mean(VAF, na.rm = TRUE)
   )
 # write_csv(muts_data.summary, paste0(path, "/Output/VAF mutation sum table.csv"))
 # jpeg(paste0(path, "/Output/VAF in Case_Control.jpeg"))
@@ -620,11 +621,11 @@ global_data %>%
   tbl_summary(by=Mets, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall()
 
-global_data %>%
+tbl <- global_data %>%
   select(CHIP, Mets) %>% 
   tbl_summary(by=CHIP) %>% 
   add_p() %>% add_overall() %>% as_gt()
-gt::gtsave(tblm3, expand = 1, zoom = 1,
+gt::gtsave(tbl, expand = 1, zoom = 1,
            paste0(
              path,
              "/Output/sumtable Metastasis in CHIP.pdf"))

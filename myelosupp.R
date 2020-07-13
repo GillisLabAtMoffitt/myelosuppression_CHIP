@@ -6,16 +6,53 @@ ggplot(global_data, aes(x=Case_Control, y=ChangeANC, fill=CHIP))+
 
 min(global_data$ChangeANC, na.rm = TRUE)
 
+# boxplot
+ggplot(global_data, aes(x=CHIP, y=BaseANC, fill=Case_Control))+
+  geom_boxplot()
+ggplot(global_data, aes(x=CHIP, y=BaseHGB, fill=Case_Control))+
+  geom_boxplot()
+ggplot(global_data, aes(x=CHIP, y=BasePLT, fill=Case_Control))+
+  geom_boxplot()
+ggplot(global_data, aes(x=CHIP, y=BaseWBC, fill=Case_Control))+
+  geom_boxplot()
 
 
-library(survival)
+ggplot(global_data, aes(x=CHIP, y=ChangeANC, fill=Case_Control))+
+  geom_boxplot()
+ggplot(global_data, aes(x=CHIP, y=ChangeHGB, fill=Case_Control))+
+  geom_boxplot()
+ggplot(global_data, aes(x=CHIP, y=ChangePLT, fill=Case_Control))+
+  geom_boxplot()
+ggplot(global_data, aes(x=CHIP, y=ChangeWBC, fill=Case_Control))+
+  geom_boxplot()
 
-global_data$Case_Control <- factor (global_data$Case_Control, labels=c(0, 1))
+df2 <- data.frame(CHIP = rep("CHIP",4), blood_subset = factor(c("BaseANC", "ChangeANC",
+                                                         "BaseHGB", "ChangeHGB",
+                                                         "BasePLT", "ChangePLT",
+                                                         "BaseWBC", "ChangeWBC")),
+                  value = c(9.7,9.7,16,16, 450, 100, 10,10), Case_Control = rep("Cases",4))
+global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
+                                                  "BaseHGB", "ChangeHGB",
+                                                  "BasePLT", "ChangePLT",
+                                                  "BaseWBC", "ChangeWBC")) %>% 
+  select("NGS_ID", "blood_subset", "value", "CHIP", "Case_Control") %>% 
+  mutate(blood_subset= factor(blood_subset, levels = c("BaseANC", "ChangeANC",
+                                                       "BaseHGB", "ChangeHGB",
+                                                       "BasePLT", "ChangePLT",
+                                                       "BaseWBC", "ChangeWBC"))) %>% 
+  ggplot(aes(x=CHIP, y=value, fill=Case_Control))+
+  stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
+  # geom_boxplot()+
+  geom_point(data = df2, aes(x = CHIP, y = value, fill=Case_Control), colour = "white", alpha=0) +
+  facet_wrap(. ~ blood_subset, scales = "free",  ncol=2)
+
+
+
 
 
 
 ####Conditional logistic regression: Myelosupp and CHIP only
-res.clogit1 <- clogit(Case_Control ~ old_CHIP + strata(Strata), data = global_data, id=NGS_ID)
+res.clogit1 <- clogit(C_C ~ CHIP + strata(Strata), data = global_data, id=NGS_ID)
 summ.clogit1 <- summary(res.clogit1)
 summ.clogit1
 exp(cbind(coef(res.clogit1), confint(res.clogit1)))

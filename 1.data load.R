@@ -24,6 +24,7 @@ CHIP_muts <-
 #######################################################################################  II  ### Data cleaning----
 # 2.1.Clinical data----
 clinical <- clinical %>% 
+  mutate(C_C = Case_Control) %>% 
   mutate(Case_Control = factor(Case_Control, labels = c("Cases", "Controls"), levels= c(1, 0))) %>% # 0 = ctrl
   # mutate(Case_Control = factor(Case_Control, labels= c("Controls", "Cases"))) %>% 
   mutate(old_CHIP = factor(old_CHIP, labels=c("No CHIP", "CHIP"))) %>% 
@@ -57,7 +58,7 @@ CHIP_muts <- CHIP_muts %>%
 # Will bind the 2 data but in 2 different ways 
 
 # 3.1.Bind to have 1 mutation per row, multiple row per patient----
-muts_data <- full_join(clinical[3:31], CHIP_muts, 
+muts_data <- full_join(clinical[3:32], CHIP_muts, 
                           by = c("NGS_ID" = "patient_id")) %>%
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
@@ -69,7 +70,7 @@ CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
   select(-CHIP_2, -CHIP_3, -CHIP_4) %>% 
   rename(CHIP = CHIP_1)
 
-global_data <- left_join(clinical[, c(1,3:31)], CHIP_muts1, 
+global_data <- left_join(clinical[, c(1,3:32)], CHIP_muts1, 
                        by = c("NGS_ID" = "patient_id")) %>% 
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("Patient", "NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
