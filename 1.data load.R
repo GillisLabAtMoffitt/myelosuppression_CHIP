@@ -12,7 +12,7 @@ library(survival)
 path <- fs::path("","Volumes","Gillis_Research","Christelle Colin-Leitzinger", "CHIP_myelosuppression_M4M 2018")
 #---
 clinical <-
-  read_csv(paste0(path, "/data/CHIP_CRASH_data_for_stats_v05.csv")) %>% 
+  read_csv(paste0(path, "/data/CHIP_CRASH_data_for_stats_v06.csv")) %>% 
   rename(old_CHIP = CHIP, old_CHPD = CHPD) %>% 
   select(-X32)
 
