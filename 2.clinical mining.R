@@ -630,6 +630,14 @@ gt::gtsave(tbl, expand = 1, zoom = 1,
              path,
              "/Output/sumtable Metastasis in CHIP.pdf"))
 
+# Neutro, Anemia, Thrombo, Leuko----
+global_data %>% 
+  select(CHIP,
+         Neutro, Anemia, Thrombo, Leuko
+  ) %>% 
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>%
+  add_n()
 
 # Table 1_Patient Population----
 # Case_Control
