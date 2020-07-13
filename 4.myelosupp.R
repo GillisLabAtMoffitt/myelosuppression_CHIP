@@ -51,8 +51,11 @@ global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
 
 
 
-####Conditional logistic regression: Myelosupp and CHIP only
-res.clogit1 <- clogit(C_C ~ CHIP + strata(Strata), data = global_data, id=NGS_ID)
-summ.clogit1 <- summary(res.clogit1)
-summ.clogit1
-exp(cbind(coef(res.clogit1), confint(res.clogit1)))
+
+
+
+
+
+
+
+
