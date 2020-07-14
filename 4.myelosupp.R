@@ -1,11 +1,6 @@
 # Blood
 
 
-ggplot(global_data, aes(x=Case_Control, y=ChangeANC, fill=CHIP))+
-  geom_bar(stat = "summary_bin")
-
-min(global_data$ChangeANC, na.rm = TRUE)
-
 # boxplot
 ggplot(global_data, aes(x=CHIP, y=BaseANC, fill=Case_Control))+
   geom_boxplot()
@@ -65,6 +60,38 @@ global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
   facet_wrap(. ~ blood_subset, scales = "free",  ncol=2)+
   stat_compare_means(aes(group = Case_Control))
 
+global_data %>% gather("blood_subset", "value", c("ChangeANC","ChangeHGB","ChangePLT","ChangeWBC")) %>% 
+  select("NGS_ID", "blood_subset", "value", "CHIP", "Case_Control") %>% 
+  ggplot(aes(x=CHIP, y=value, fill=Case_Control))+
+  geom_bar(stat = "summary_bin")+
+  facet_wrap(. ~ blood_subset, scales = "free",  ncol=2)+
+  stat_compare_means(aes(group = CHIP), method = "anova", label.y= 0)
+min(global_data$ChangeANC, na.rm = TRUE)
+max(global_data$ChangeANC, na.rm = TRUE)
+mean(global_data$ChangeANC, na.rm = TRUE)
+
+global_data %>% gather("blood_subset", "value", c("BaseANC","BaseHGB","BasePLT","BaseWBC")) %>% 
+  select("NGS_ID", "blood_subset", "value", "CHIP", "Case_Control") %>% 
+  ggplot(aes(x=CHIP, y=value, fill=Case_Control))+
+  geom_bar(stat = "summary_bin")+
+  facet_wrap(. ~ blood_subset, scales = "free",  ncol=2)+
+  stat_compare_means(aes(group = CHIP), method = "t.test", label.y= 0)+
+  stat_compare_means(label.y= 5)
+
+
+
+
+
+
+# Logistic regression----
+
+
+
+
+
+
+
+# Strata----
 global_data %>% 
   ggpaired(x = "Case_Control", y = "BaseANC",
            id = "Strata",
