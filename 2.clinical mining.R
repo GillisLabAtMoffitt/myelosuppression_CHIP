@@ -285,14 +285,14 @@ muts_data.summary <- muts_data %>%
 # jpeg(paste0(path, "/Output/VAF in Case_Control.jpeg"))
 ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF, color=Case_Control)) +
   geom_jitter(
-    position = position_jitter(0.2), color = "gray"
+    position = position_jitter(0.2), color = "lightgray"
   ) + 
   theme_minimal()+
   geom_pointrange(
     aes(ymin = median-sd, ymax = median+sd),
     data = muts_data.summary
   )+
-  stat_compare_means(label.x = 1.05, label.y = .54)
+  stat_compare_means(label.x = 1.16, label.y = .4)
 # dev.off()
 
 tbl <- muts_data %>% 
@@ -522,6 +522,12 @@ ggplot(data = global_data, aes(x=CANCER, y=Age), fill=CANCER) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Gender.pdf"))
+ggplot(data = global_data, aes(x=Gender, y=Age), fill=Gender) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x="Gender", y="Age", title="Age repartition") +
+  geom_jitter(shape=16, position=position_jitter(0.2))
+
 ggplot(data = global_data, aes(x=Gender, y=Age), fill=Gender) +
   geom_boxplot() +
   theme_minimal() +
