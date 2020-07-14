@@ -101,8 +101,32 @@ global_data %>% gather("blood_subset", "value", c("BaseANC","BaseHGB","BasePLT",
 # Logistic regression----
 # Case prediction by CHIP
 
+# All var
+logistic <- glm(C_C ~ CHIP+Gender+Race+Ethnicity+Smoking+Mets+Neutro+Anemia+Thrombo+Prior_chemo+Prior_rad,
+                data = global_data, family = "binomial")
+summary(logistic)
 
+logistic <- glm(C_C ~ CHIP+BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC,
+                data = global_data, family = "binomial")
+summary(logistic)
+logistic <- glm(C_C ~ CHIP+BaseANC+ChangeANC,
+                data = global_data, family = "binomial")
+summary(logistic)
+logistic <- glm(C_C ~ CHIP+BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC+MAX2heme,
+                data = global_data, family = "binomial")
+summary(logistic)
 
+logistic <- glm(C_C ~ Prior_rad,
+                data = global_data, family = "binomial")
+summary(logistic)
+logistic <- glm(C_C ~ Prior_chemo,
+                data = global_data, family = "binomial")
+summary(logistic)
+
+##Adjusted - CHIP and mets
+CHIP_myelo_adj <-glm(Mets ~ CHIP + Age + Smoking + Prior_chemo + Prior_rad, data = global_data, family = binomial(link='logit'))
+summary(CHIP_myelo_adj)
+exp(cbind(coef(CHIP_myelo_adj), confint(CHIP_myelo_adj)))
 
 
 

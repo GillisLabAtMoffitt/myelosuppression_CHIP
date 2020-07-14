@@ -37,181 +37,181 @@ exp(cbind(coef(res.clogit5), confint(res.clogit5)))
 
 
 ##Age by Case_Control 
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(Age, na.rm = TRUE),
     IQR = IQR(Age, na.rm = TRUE)
   )
 
-res <- wilcox.test(Age ~ Case_Control, data = M4M,
+res <- wilcox.test(Age ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Sex by Case_Control
-table(M4M$Case_Control, M4M$Gender)
-Case_Controlsex <- table(M4M$Case_Control, M4M$Gender)
+table(global_data$Case_Control, global_data$Gender)
+Case_Controlsex <- table(global_data$Case_Control, global_data$Gender)
 summary(Case_Controlsex)
-#fisher.test(table (M4M$Case_Control, M4M$Gender))
+#fisher.test(table (global_data$Case_Control, global_data$Gender))
 
 ##Race by Case_Control
-table(M4M$Case_Control, M4M$Race)
-Case_Controlrace <- table(M4M$Case_Control, M4M$Race)
+table(global_data$Case_Control, global_data$Race)
+Case_Controlrace <- table(global_data$Case_Control, global_data$Race)
 # summary(Case_Controlrace)
-fisher.test(table (M4M$Case_Control, M4M$Race))
+fisher.test(table (global_data$Case_Control, global_data$Race))
 
 ##Smoking by Case_Control 
-table(M4M$Case_Control, M4M$Smoking)
-Case_ControlSmoking <- table(M4M$Case_Control, M4M$Smoking)
+table(global_data$Case_Control, global_data$Smoking)
+Case_ControlSmoking <- table(global_data$Case_Control, global_data$Smoking)
 summary(Case_ControlSmoking)
-# fisher.test(table (M4M$Case_Control, M4M$Smoking))
+# fisher.test(table (global_data$Case_Control, global_data$Smoking))
 
 ##Metastasis by Case_Control
-table(M4M$Case_Control, M4M$Mets)
-Case_ControlMets <- table(M4M$Case_Control, M4M$Mets)
+table(global_data$Case_Control, global_data$Mets)
+Case_ControlMets <- table(global_data$Case_Control, global_data$Mets)
 summary(Case_ControlMets)
-# fisher.test(table (M4M$Case_Control, M4M$Mets))
+# fisher.test(table (global_data$Case_Control, global_data$Mets))
 
 ##Prior Chemotherapy by Case_Control
-table(M4M$Case_Control, M4M$Prior_chemo)
-Case_Controlchemo <- table(M4M$Case_Control, M4M$Prior_chemo)
+table(global_data$Case_Control, global_data$Prior_chemo)
+Case_Controlchemo <- table(global_data$Case_Control, global_data$Prior_chemo)
 summary(Case_Controlchemo)
-# fisher.test(table (M4M$Case_Control, M4M$Prior_chemo))
+# fisher.test(table (global_data$Case_Control, global_data$Prior_chemo))
 
 ##Prior Radiation by Case_Control
-table(M4M$Case_Control, M4M$Prior_rad)
-Case_Controlrad <- table(M4M$Case_Control, M4M$Prior_rad)
+table(global_data$Case_Control, global_data$Prior_rad)
+Case_Controlrad <- table(global_data$Case_Control, global_data$Prior_rad)
 summary(Case_Controlrad)
-# fisher.test(table (M4M$Case_Control, M4M$Prior_rad))
+# fisher.test(table (global_data$Case_Control, global_data$Prior_rad))
 
 ##MAX2-heme by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(MAX2heme, na.rm = TRUE),
     IQR = IQR(MAX2heme, na.rm = TRUE)
   )
-res <- wilcox.test(MAX2heme ~ Case_Control, data = M4M,
+res <- wilcox.test(MAX2heme ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Baseline ANC by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(BaseANC, na.rm = TRUE),
     IQR = IQR(BaseANC, na.rm = TRUE)
   )
-res <- wilcox.test(BaseANC ~ Case_Control, data = M4M,
+res <- wilcox.test(BaseANC ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Baseline HGB by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(BaseHGB, na.rm = TRUE),
     IQR = IQR(BaseHGB, na.rm = TRUE)
   )
-res <- wilcox.test(BaseHGB ~ Case_Control, data = M4M,
+res <- wilcox.test(BaseHGB ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Baseline PLT by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(BasePLT, na.rm = TRUE),
     IQR = IQR(BasePLT, na.rm = TRUE)
   )
-res <- wilcox.test(BasePLT ~ Case_Control, data = M4M,
+res <- wilcox.test(BasePLT ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Baseline WBC by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(BaseWBC, na.rm = TRUE),
     IQR = IQR(BaseWBC, na.rm = TRUE)
   )
-res <- wilcox.test(BaseWBC ~ Case_Control, data = M4M,
+res <- wilcox.test(BaseWBC ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Change in ANC by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(ChangeANC, na.rm = TRUE),
     IQR = IQR(ChangeANC, na.rm = TRUE)
   )
-res <- wilcox.test(ChangeANC ~ Case_Control, data = M4M,
+res <- wilcox.test(ChangeANC ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Change in HGB by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(ChangeHGB, na.rm = TRUE),
     IQR = IQR(ChangeHGB, na.rm = TRUE)
   )
-res <- wilcox.test(ChangeHGB ~ Case_Control, data = M4M,
+res <- wilcox.test(ChangeHGB ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Change in PLT by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(ChangePLT, na.rm = TRUE),
     IQR = IQR(ChangePLT, na.rm = TRUE)
   )
-res <- wilcox.test(ChangePLT ~ Case_Control, data = M4M,
+res <- wilcox.test(ChangePLT ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Change in WBC by Case_Control
-group_by(M4M, Case_Control) %>%
+group_by(global_data, Case_Control) %>%
   summarise(
     count = n(),
     median = median(ChangeWBC, na.rm = TRUE),
     IQR = IQR(ChangeWBC, na.rm = TRUE)
   )
-res <- wilcox.test(ChangeWBC ~ Case_Control, data = M4M,
+res <- wilcox.test(ChangeWBC ~ Case_Control, data = global_data,
                    exact = FALSE)
 res
 
 ##Neutopenia by Case_Control
-table(M4M$Case_Control, M4M$Neutro)
-Case_ControlNeutro <- table(M4M$Case_Control, M4M$Neutro)
+table(global_data$Case_Control, global_data$Neutro)
+Case_ControlNeutro <- table(global_data$Case_Control, global_data$Neutro)
 summary(Case_ControlNeutro)
-# fisher.test(table (M4M$Case_Control, M4M$Neutro))
+# fisher.test(table (global_data$Case_Control, global_data$Neutro))
 
 ##Anemia by Case_Control
-table(M4M$Case_Control, M4M$Anemia)
-Case_ControlAnemia <- table(M4M$Case_Control, M4M$Anemia)
+table(global_data$Case_Control, global_data$Anemia)
+Case_ControlAnemia <- table(global_data$Case_Control, global_data$Anemia)
 # summary(Case_ControlAnemia)
-fisher.test(table (M4M$Case_Control, M4M$Anemia))
+fisher.test(table (global_data$Case_Control, global_data$Anemia))
 
 ##Thrombocytopenia by Case_Control
-table(M4M$Case_Control, M4M$Thrombo)
-Case_ControlThrombo <- table(M4M$Case_Control, M4M$Thrombo)
+table(global_data$Case_Control, global_data$Thrombo)
+Case_ControlThrombo <- table(global_data$Case_Control, global_data$Thrombo)
 # summary(Case_ControlThrombo)
-fisher.test(table (M4M$Case_Control, M4M$Thrombo))
+fisher.test(table (global_data$Case_Control, global_data$Thrombo))
 
 ##Leukopenia by Case_Control
-table(M4M$Case_Control, M4M$Leuko)
-Case_ControlLeuko <- table(M4M$Case_Control, M4M$Leuko)
+table(global_data$Case_Control, global_data$Leuko)
+Case_ControlLeuko <- table(global_data$Case_Control, global_data$Leuko)
 summary(Case_ControlLeuko)
-# fisher.test(table (M4M$Case_Control, M4M$Leuko))
+# fisher.test(table (global_data$Case_Control, global_data$Leuko))
 
 
 
 
 
-#### M4M only - By CHIP status----
+#### global_data only - By CHIP status----
 
 
 ##Age by CHIP 
@@ -416,7 +416,7 @@ group_by(global_data, CHIP) %>%
   summarise(
     count = n(),
     median = median(BaseANC, na.rm = TRUE),
-    IQR = IQR(BaseWBC, na.rm = TRUE)
+    IQR = IQR(BaseWBC, na.rm = TRUE) # WBC or ANC----
   )
 
 library(ggpubr)
@@ -686,7 +686,7 @@ res
 table(global_data$Case_Control, global_data$Gender)
 Case_Controlsex <- table(global_data$Case_Control, global_data$Gender)
 summary(Case_Controlsex)
-#fisher.test(table (M4M$Case_Control, M4M$Gender))
+#fisher.test(table (global_data$Case_Control, global_data$Gender))
 
 ##Race by Case_Control
 table(global_data$Case_Control, global_data$Race)
@@ -698,25 +698,25 @@ fisher.test(table (global_data$Case_Control, global_data$Race))
 table(global_data$Case_Control, global_data$Smoking)
 Case_ControlSmoking <- table(global_data$Case_Control, global_data$Smoking)
 summary(Case_ControlSmoking)
-# fisher.test(table (M4M$Case_Control, M4M$Smoking))
+# fisher.test(table (global_data$Case_Control, global_data$Smoking))
 
 ##Metastasis by Case_Control
 table(global_data$Case_Control, global_data$Mets)
 Case_ControlMets <- table(global_data$Case_Control, global_data$Mets)
 summary(Case_ControlMets)
-# fisher.test(table (M4M$Case_Control, M4M$Mets))
+# fisher.test(table (global_data$Case_Control, global_data$Mets))
 
 ##Prior Chemotherapy by Case_Control
 table(global_data$Case_Control, global_data$Prior_chemo)
 Case_Controlchemo <- table(global_data$Case_Control, global_data$Prior_chemo)
 summary(Case_Controlchemo)
-# fisher.test(table (M4M$Case_Control, M4M$Prior_chemo))
+# fisher.test(table (global_data$Case_Control, global_data$Prior_chemo))
 
 ##Prior Radiation by Case_Control
 table(global_data$Case_Control, global_data$Prior_rad)
 Case_Controlrad <- table(global_data$Case_Control, global_data$Prior_rad)
 summary(Case_Controlrad)
-# fisher.test(table (M4M$Case_Control, M4M$Prior_rad))
+# fisher.test(table (global_data$Case_Control, global_data$Prior_rad))
 
 ##MAX2-heme by Case_Control
 group_by(global_data, Case_Control) %>%
