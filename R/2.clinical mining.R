@@ -317,7 +317,7 @@ ggplot(muts_data.summary, aes(x=Case_Control, y=median, fill=Case_Control)) +
   theme_minimal()
 # dev.off()
 
-# VAF 10%----
+# VAF 10%----VAF is defined as the number of alternative reads divided by the total read depth
 # tbl <- 
 muts_data %>% 
   group_by(Case_Control) %>% 

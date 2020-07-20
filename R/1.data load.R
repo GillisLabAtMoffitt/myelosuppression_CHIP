@@ -38,6 +38,10 @@ clinical <- clinical %>%
   mutate(Thrombo = factor(Thrombo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes"))) %>%
+  mutate(ChangeANC = abs(ChangeANC)) %>% 
+  mutate(ChangeHGB = abs(ChangeHGB)) %>% 
+  mutate(ChangeWBC = abs(ChangeWBC)) %>% 
+  mutate(ChangePLT = abs(ChangePLT)) %>% 
   filter(Cohort == "M4M") # remove later
 
 # 2.2.CHIP data----
