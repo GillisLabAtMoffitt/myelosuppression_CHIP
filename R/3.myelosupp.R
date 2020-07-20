@@ -1,41 +1,4 @@
-
-# What is the most correlated with myelosupp?----
-# Neutro, Anemia, Thrombo, Leuko?
-summary(table(global_data$Case_Control, global_data$Neutro))
-summary(table(global_data$Case_Control, global_data$Anemia))
-summary(table(global_data$Case_Control, global_data$Thrombo))
-summary(table(global_data$Case_Control, global_data$Leuko))
-
-global_data %>% 
-  select(Case_Control,
-         Neutro, Anemia, Thrombo, Leuko
-  ) %>% 
-  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
-  add_p() %>%
-  add_n()
-
-logistic <- glm(Cases_Controls ~ Neutro+Anemia+Thrombo+Leuko,
-                data = global_data, family = "binomial")
-summary(logistic)
-logistic <- glm(Cases_Controls ~ Neutro+Thrombo+Leuko,
-                data = global_data, family = "binomial")
-summary(logistic)
-
-# CBC?
-logistic <- glm(Cases_Controls ~ CHIP+BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC+MAX2heme,
-                data = global_data, family = "binomial")
-summary(logistic)
-logistic <- glm(Cases_Controls ~ BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC,
-                data = global_data, family = "binomial")
-summary(logistic)
-logistic <- glm(Cases_Controls ~ BaseANC+ChangeANC,
-                data = global_data, family = "binomial")
-summary(logistic)
-logistic <- glm(Cases_Controls ~ CHIP+BaseANC+ChangeANC,
-                data = global_data, family = "binomial")
-summary(logistic)
-
-
+# Look at CBC in Case_Control
 global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                   "BaseHGB", "ChangeHGB",
                                                   "BasePLT", "ChangePLT",
@@ -155,13 +118,6 @@ global_data %>% gather("blood_subset", "value", c("BaseANC","BaseHGB","BasePLT",
   facet_wrap(. ~ blood_subset, scales = "free",  ncol=2)+
   stat_compare_means(aes(group = Case_Control), label.y= 0, size= 3)+
   stat_compare_means(label.y= 10, size= 3)
-
-
-
-
-
-
-
 
 
 # Strata----
