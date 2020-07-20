@@ -1,35 +1,35 @@
 ####Conditional logistic regression: Myelosupp and CHIP only
-res.clogit1 <- clogit(C_C ~ CHIP + strata(Strata), data = global_data, id=NGS_ID)
+res.clogit1 <- clogit(Cases_Controls ~ CHIP + strata(Strata), data = global_data, id=NGS_ID)
 summ.clogit1 <- summary(res.clogit1)
 summ.clogit1
 exp(cbind(coef(res.clogit1), confint(res.clogit1)))
 
 ##Conditional: Myelosupp~CHIP, age, gender, race, MAX2
-res.clogit2 <- clogit(C_C ~ CHIP + Age + Gender + Race + MAX2heme + strata(Strata), data = global_data)
+res.clogit2 <- clogit(Cases_Controls ~ CHIP + Age + Gender + Race + MAX2heme + strata(Strata), data = global_data)
 summ.clogit2 <- summary(res.clogit2)
 summ.clogit2
 exp(cbind(coef(res.clogit2), confint(res.clogit2)))
 
 ##Conditional: Myelosupp~CHIP, all variables
-res.clogit3 <- clogit(C_C ~ CHIP + Age + Gender + Race + Smoking + Mets + BaseANC + BaseHGB + BasePLT + BaseWBC + Prior_chemo + Prior_rad + MAX2heme + strata(Strata), data = global_data)
+res.clogit3 <- clogit(Cases_Controls ~ CHIP + Age + Gender + Race + Smoking + Mets + BaseANC + BaseHGB + BasePLT + BaseWBC + Prior_chemo + Prior_rad + MAX2heme + strata(Strata), data = global_data)
 summ.clogit3 <- summary(res.clogit3)
 summ.clogit3
 exp(cbind(coef(res.clogit3), confint(res.clogit3)))
 
 ##Conditional: Myelosupp~CHIP, clinical variables -- in Moffitt job talk
-res.clogit4 <- clogit(C_C ~ CHIP + Age + Mets + BaseANC + BaseHGB + BasePLT + BaseWBC + Prior_chemo + Prior_rad + MAX2heme + strata(Strata), data = global_data)
+res.clogit4 <- clogit(Cases_Controls ~ CHIP + Age + Mets + BaseANC + BaseHGB + BasePLT + BaseWBC + Prior_chemo + Prior_rad + MAX2heme + strata(Strata), data = global_data)
 summ.clogit4 <- summary(res.clogit4)
 summ.clogit4
 exp(cbind(coef(res.clogit4), confint(res.clogit4)))
 
 ##Conditional: Myelosupp~CHIP, clinical variables -- in MSK job talk
-res.clogit4 <- clogit(C_C ~ CHIP + Age + Gender + BaseANC + BaseHGB + BasePLT + BaseWBC + Prior_chemo + Prior_rad + MAX2heme + strata(Strata), data = global_data)
+res.clogit4 <- clogit(Cases_Controls ~ CHIP + Age + Gender + BaseANC + BaseHGB + BasePLT + BaseWBC + Prior_chemo + Prior_rad + MAX2heme + strata(Strata), data = global_data)
 summ.clogit4 <- summary(res.clogit4)
 summ.clogit4
 exp(cbind(coef(res.clogit4), confint(res.clogit4)))
 
 ##Conditional: Myelosupp~CHIP, baseline labs, MAX2
-res.clogit5 <- clogit(C_C ~ CHIP + BaseANC + BaseHGB + BasePLT + BaseWBC + MAX2heme + strata(Strata), data = global_data)
+res.clogit5 <- clogit(Cases_Controls ~ CHIP + BaseANC + BaseHGB + BasePLT + BaseWBC + MAX2heme + strata(Strata), data = global_data)
 summ.clogit5 <- summary(res.clogit5)
 summ.clogit5
 exp(cbind(coef(res.clogit5), confint(res.clogit5)))

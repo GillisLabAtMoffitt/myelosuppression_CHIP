@@ -309,27 +309,30 @@ ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF, c
 #              path,
 #              "/Output/sum VAF in Case_Control.pdf"))
 
-# ggplot(global_data, aes(x=Case_Control, y= VAF))+
-#   geom_dotplot(
-#     binaxis = "y", stackdir = "center",
-#     color = "lightgray"
-#   ) + 
-#   stat_summary(
-#     fun.data = "mean_sdl", fun.args = list(mult=1), 
-#     geom = "pointrange", color = "red"
-#   )
-
 # Barplot
-# ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y=VAF, fill=Case_Control)) +
-#   geom_bar(stat = "summary_bin", fun = mean)+
-#   geom_errorbar(aes(ymin = min(VAF), ymax = max(VAF)))
-
 # jpeg(paste0(path, "/Output/barplot VAF in Case_Control.jpeg"))
 ggplot(muts_data.summary, aes(x=Case_Control, y=median, fill=Case_Control)) +
   geom_bar(stat = "identity")+
   geom_errorbar(aes(ymin = median, ymax = median+sd, color=Case_Control))+
   theme_minimal()
 # dev.off()
+
+# VAF 10%----
+# tbl <- 
+muts_data %>% 
+  group_by(Case_Control) %>% 
+  filter(!is.na(VAF)) %>% 
+  select(Case_Control, VAF) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  add_p() %>% add_overall() %>% as_gt()
+# gt::gtsave(tbl, expand = 1, zoom = .5,
+#            paste0(
+#              path,
+#              "/Output/sum VAF10% in Case_Control.pdf"))
+
+
+
+
 
 # Genes----
 # Number mutations vs Case # Attention will count multiple if happens more than once in same patient
@@ -689,7 +692,8 @@ global_data %>%
 #            paste0(
 #              path, 
 #              "/Output/Table 2_CHIP vs no CHIP.pdf"))
-# Combined
+  
+# Combined----
 tbl1 <- global_data %>% 
   filter(CHIP == "CHIP") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
@@ -719,6 +723,37 @@ tbl2 <- global_data %>%
 #            paste0(
 #              path, 
 #              "/Output/Table 2_Patient Population faceted by CHIP.pdf"))
+
+# without the unknown
+tbl1 <- 
+  global_data %>% 
+  filter(CHIP == "CHIP") %>% 
+  select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
+         BaseANC, BaseHGB, BasePLT, BaseWBC,
+         ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
+         Prior_chemo, Prior_rad, 
+         MAX2, MAX2heme
+  ) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
+  add_p() %>%
+  add_n()
+tbl2 <- global_data %>% 
+  filter(CHIP == "No CHIP") %>% 
+  select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
+         BaseANC, BaseHGB, BasePLT, BaseWBC,
+         ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
+         Prior_chemo, Prior_rad, 
+         MAX2, MAX2heme
+  ) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
+  add_p() %>%
+  add_n()
+# tbl <- 
+tbl_merge(list(tbl1, tbl2),
+          tab_spanner = c("**CHIP**", "**no CHIP**"))  %>% as_gt()
+
 
 
 # CHIP in age, gender, race, ethnicity

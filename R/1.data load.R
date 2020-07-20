@@ -24,7 +24,7 @@ CHIP_muts <-
 #######################################################################################  II  ### Data cleaning----
 # 2.1.Clinical data----
 clinical <- clinical %>% 
-  mutate(C_C = Case_Control) %>% 
+  mutate(Cases_Controls = Case_Control) %>% 
   mutate(Case_Control = factor(Case_Control, labels = c("Cases", "Controls"), levels= c(1, 0))) %>% # 0 = ctrl
   # mutate(Case_Control = factor(Case_Control, labels= c("Controls", "Cases"))) %>% 
   mutate(old_CHIP = factor(old_CHIP, labels=c("No CHIP", "CHIP"))) %>% 

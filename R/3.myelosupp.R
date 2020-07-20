@@ -14,24 +14,24 @@ global_data %>%
   add_p() %>%
   add_n()
 
-logistic <- glm(C_C ~ Neutro+Anemia+Thrombo+Leuko,
+logistic <- glm(Cases_Controls ~ Neutro+Anemia+Thrombo+Leuko,
                 data = global_data, family = "binomial")
 summary(logistic)
-logistic <- glm(C_C ~ Neutro+Thrombo+Leuko,
+logistic <- glm(Cases_Controls ~ Neutro+Thrombo+Leuko,
                 data = global_data, family = "binomial")
 summary(logistic)
 
 # CBC?
-logistic <- glm(C_C ~ CHIP+BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC+MAX2heme,
+logistic <- glm(Cases_Controls ~ CHIP+BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC+MAX2heme,
                 data = global_data, family = "binomial")
 summary(logistic)
-logistic <- glm(C_C ~ BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC,
+logistic <- glm(Cases_Controls ~ BaseANC+BaseHGB+BasePLT+BaseWBC+ChangeANC+ChangeHGB+ChangePLT+ChangeWBC,
                 data = global_data, family = "binomial")
 summary(logistic)
-logistic <- glm(C_C ~ BaseANC+ChangeANC,
+logistic <- glm(Cases_Controls ~ BaseANC+ChangeANC,
                 data = global_data, family = "binomial")
 summary(logistic)
-logistic <- glm(C_C ~ CHIP+BaseANC+ChangeANC,
+logistic <- glm(Cases_Controls ~ CHIP+BaseANC+ChangeANC,
                 data = global_data, family = "binomial")
 summary(logistic)
 
@@ -167,16 +167,16 @@ global_data %>% gather("blood_subset", "value", c("BaseANC","BaseHGB","BasePLT",
 # Case prediction by CHIP
 
 # All var
-logistic <- glm(C_C ~ CHIP+Gender+Race+Ethnicity+Smoking+Mets+Neutro+Anemia+Thrombo+Prior_chemo+Prior_rad,
+logistic <- glm(Cases_Controls ~ CHIP+Gender+Race+Ethnicity+Smoking+Mets+Neutro+Anemia+Thrombo+Prior_chemo+Prior_rad,
                 data = global_data, family = "binomial")
 summary(logistic)
 
 
 
-logistic <- glm(C_C ~ Prior_rad,
+logistic <- glm(Cases_Controls ~ Prior_rad,
                 data = global_data, family = "binomial")
 summary(logistic)
-logistic <- glm(C_C ~ Prior_chemo,
+logistic <- glm(Cases_Controls ~ Prior_chemo,
                 data = global_data, family = "binomial")
 summary(logistic)
 
