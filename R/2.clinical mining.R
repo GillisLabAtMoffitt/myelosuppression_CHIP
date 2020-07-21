@@ -309,6 +309,7 @@ ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF, c
 #              path,
 #              "/Output/sum VAF in Case_Control.pdf"))
 
+
 # Barplot
 # jpeg(paste0(path, "/Output/barplot VAF in Case_Control.jpeg"))
 ggplot(muts_data.summary, aes(x=Case_Control, y=median, fill=Case_Control)) +
@@ -318,11 +319,34 @@ ggplot(muts_data.summary, aes(x=Case_Control, y=median, fill=Case_Control)) +
 # dev.off()
 
 # VAF 10%----VAF is defined as the number of alternative reads divided by the total read depth
+muts_data.summ <- muts_data %>%
+  group_by(Case_Control) %>% 
+  filter(!is.na(CHIP_VAF)) %>% 
+  summarise(
+    sd = sd(CHIP_VAF, na.rm = TRUE),
+    CHIP_VAF = mean(CHIP_VAF, na.rm = TRUE),
+    median = median(CHIP_VAF, na.rm = TRUE),
+    min = min(CHIP_VAF, na.rm = TRUE),
+    max = max(CHIP_VAF, na.rm = TRUE),
+    mean = mean(CHIP_VAF, na.rm = TRUE)
+  )
+# jpeg(paste0(path, "/Output/VAF10% in Case_Control.jpeg"))
+ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= CHIP_VAF, color=Case_Control)) +
+  geom_jitter(
+    position = position_jitter(0.2), color = "lightgray"
+  ) + 
+  theme_minimal()+
+  geom_pointrange(
+    aes(ymin = median-sd, ymax = median+sd),
+    data = muts_data.summ
+  )+
+  stat_compare_means(label.x = 1.16, label.y = .4)
+# dev.off()
 # tbl <- 
 muts_data %>% 
   group_by(Case_Control) %>% 
-  filter(!is.na(VAF)) %>% 
-  select(Case_Control, VAF) %>% 
+  filter(!is.na(CHIP_VAF)) %>% 
+  select(Case_Control, CHIP_VAF) %>% 
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall() %>% as_gt()
 # gt::gtsave(tbl, expand = 1, zoom = .5,

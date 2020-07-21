@@ -67,6 +67,9 @@ CHIP_muts <- CHIP_muts %>%
 muts_data <- full_join(clinical[3:37], CHIP_muts, 
                           by = c("NGS_ID" = "patient_id")) %>%
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
+  mutate(CHIP_VAF = case_when(
+    VAF >= 0.1 ~ VAF
+  )) %>% 
   select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
 # write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
 
