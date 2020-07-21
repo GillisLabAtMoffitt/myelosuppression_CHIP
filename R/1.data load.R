@@ -32,16 +32,18 @@ clinical <- clinical %>%
   mutate(Race = factor(Race, labels=c("White", "Other"))) %>% 
   mutate(Gender = factor(Gender, labels = c("Male", "Female"))) %>% 
   mutate(Smoking = factor(Smoking, labels=c("Never","Ever"))) %>% 
-  mutate(Mets = factor(Mets, labels=c("No", "Yes"))) %>% 
-  mutate(Neutro = factor(Neutro, labels=c("No", "Yes"))) %>% 
-  mutate(Anemia = factor(Anemia, labels=c("No", "Yes"))) %>% 
-  mutate(Thrombo = factor(Thrombo, labels=c("No", "Yes"))) %>% 
+  mutate(mets = Mets) %>% 
+  mutate(Mets = factor(Mets, labels=c("No", "Yes"))) %>%
+  mutate(neutro = Neutro) %>% 
+  mutate(Neutro = factor(Neutro, labels=c("No", "Yes"))) %>%
+  mutate(anemia = Anemia) %>% 
+  mutate(Anemia = factor(Anemia, labels=c("No", "Yes"))) %>%
+  mutate(thrombo = Thrombo) %>% 
+  mutate(Thrombo = factor(Thrombo, labels=c("No", "Yes"))) %>%
+  mutate(leuko = Leuko) %>% 
+  mutate(Leuko = factor(Leuko, labels=c("No", "Yes"))) %>%
   mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
   mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes"))) %>%
-  mutate(ChangeANC = abs(ChangeANC)) %>% 
-  mutate(ChangeHGB = abs(ChangeHGB)) %>% 
-  mutate(ChangeWBC = abs(ChangeWBC)) %>% 
-  mutate(ChangePLT = abs(ChangePLT)) %>% 
   filter(Cohort == "M4M") # remove later
 
 # 2.2.CHIP data----
@@ -62,7 +64,7 @@ CHIP_muts <- CHIP_muts %>%
 # Will bind the 2 data but in 2 different ways 
 
 # 3.1.Bind to have 1 mutation per row, multiple row per patient----
-muts_data <- full_join(clinical[3:32], CHIP_muts, 
+muts_data <- full_join(clinical[3:37], CHIP_muts, 
                           by = c("NGS_ID" = "patient_id")) %>%
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
@@ -74,7 +76,7 @@ CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
   select(-CHIP_2, -CHIP_3, -CHIP_4) %>% 
   rename(CHIP = CHIP_1)
 
-global_data <- left_join(clinical[, c(1,3:32)], CHIP_muts1, 
+global_data <- left_join(clinical[, c(1,3:37)], CHIP_muts1, 
                        by = c("NGS_ID" = "patient_id")) %>% 
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
   select("Patient", "NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
