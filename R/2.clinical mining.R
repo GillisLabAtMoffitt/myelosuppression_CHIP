@@ -468,7 +468,7 @@ tbl %>% mutate(Var1 = fct_reorder(Var1, desc(Freq))) %>%
 
 tbl <- as.data.frame(table(global_data$CHIP,global_data$CANCER))
 # jpeg(paste0(path, "/Output/Cancer repartition vs CHIP.jpeg"))
-tbl %>% mutate(Var2 = fct_reorder(Var2, desc(Freq))) %>%
+tbl %>% mutate(Var2 = fct_reorder(Var2, Freq)) %>%
   ggplot(aes(x=Var2, y=Freq, fill=Var1)) +
   geom_bar(stat="identity", width = .75, position = position_dodge(preserve = "single")) +
   scale_fill_discrete(name = "CHIP") +
@@ -478,7 +478,7 @@ tbl %>% mutate(Var2 = fct_reorder(Var2, desc(Freq))) %>%
   labs(x="Cancer Type", y="Number of Patient", title="CHIP in Cancer type Repartition")
 # dev.off()
 
-muts_data %>% group_by(CANCER,CHIP) %>% 
+global_data %>% group_by(CANCER,CHIP) %>% 
   summarise(count=n()) %>% 
   mutate(perc=(count/sum(count)*100)
   ) %>% 
@@ -489,7 +489,7 @@ muts_data %>% group_by(CANCER,CHIP) %>%
   coord_flip()
 
 # jpeg(paste0(path, "/Output/Cancer repartition vs CHIP percent whole pop.jpeg"))
-muts_data %>% group_by(CANCER,CHIP) %>% 
+global_data %>% group_by(CANCER,CHIP) %>% 
   summarise(count=n()) %>% 
   mutate(percent=(count/NROW(muts_data$CANCER)*100)
   ) %>% 
@@ -501,7 +501,7 @@ muts_data %>% group_by(CANCER,CHIP) %>%
 # dev.off()
 
 # tbl <- 
-  muts_data %>% 
+global_data %>% 
   select(CHIP, CANCER) %>% 
   tbl_summary(by=CHIP) %>% 
   add_p %>% 
