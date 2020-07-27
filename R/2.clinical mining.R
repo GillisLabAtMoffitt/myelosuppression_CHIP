@@ -19,10 +19,16 @@ global_M4M %>% group_by(Case_Control,CHIP) %>%
   annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_M4M$Case_Control, global_M4M$CHIP))[3]),
            color = "black", size = 6, hjust = 0, vjust = 1)
 # dev.off()
+# tbl <-
 global_M4M %>% 
   select(Case_Control, CHIP) %>% 
   tbl_summary(by= Case_Control) %>% 
-  add_p() %>% add_overall()
+  add_p() %>% add_overall() %>% as_gt()
+# gt::gtsave(tbl, expand = 1, zoom = 0.5,
+#            paste0(
+#              path,
+#              "/Output/sumtable CHIP in Case_Control in M4M.pdf"))
+
 # CHPD prevalence
 # pdf(paste0(path, "/Output/CHPD prevalence.pdf"))
 # global_data %>% group_by(Case_Control,CHPD) %>% 
@@ -57,10 +63,10 @@ global_data %>% group_by(Case_Control,CHIP) %>%
   select(Case_Control, CHIP) %>% 
   tbl_summary(by= Case_Control) %>% 
   add_p() %>% add_overall() %>% as_gt()
-# gt::gtsave(tbl, expand = 1, zoom = 0.5, 
+# gt::gtsave(tbl, expand = 1, zoom = 0.5,
 #            paste0(
-#              path, 
-#              "/Output/sumtable CHIP in Case_Control.pdf"))
+#              path,
+#              "/Output/sumtable CHIP in Case_Control in M4M-UNC.pdf"))
 # tbl <- 
   global_data %>% 
   select(Case_Control, CHIP) %>% 
@@ -313,7 +319,7 @@ ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF, c
   stat_compare_means(label.x = 1.16, label.y = .4)
 # dev.off()
 
-# tbl <- 
+# tbl <-
   muts_data %>% 
   group_by(Case_Control) %>% 
   filter(!is.na(VAF)) %>% 
@@ -383,10 +389,15 @@ global_M4M %>% group_by(Case_Control,CHIP_VAF_10P) %>%
   geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
   annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_M4M$Case_Control, global_M4M$CHIP_VAF_10P))[3]),
            color = "black", size = 6, hjust = 0, vjust = 1)
+# tbl <- 
 global_M4M %>% 
   select(Case_Control, CHIP_VAF_10P) %>% 
   tbl_summary(by= Case_Control) %>% 
-  add_p() %>% add_overall() %>% as_kable()
+  add_p() %>% add_overall() %>% as_gt
+# gt::gtsave(tbl, expand = 1, zoom = .5,
+#            paste0(
+#              path,
+#              "/Output/sumtable CHIP Prevalence in Case_Control for VAF10%.pdf"))
 
 
 # Genes----
@@ -532,16 +543,15 @@ global_M4M %>% group_by(CANCER,CHIP) %>%
   coord_flip()
 # dev.off()
 
-# tbl <- 
+tbl <- 
 global_M4M %>% 
   select(CHIP, CANCER) %>% 
   tbl_summary(by=CHIP) %>% 
-  add_p %>% 
-  add_q %>% as_gt()
-# gt::gtsave(tbl, expand = 1, zoom = 1,
-#            paste0(
-#              path,
-#              "/Output/sumtable Cancer repartition vs CHIP percent whole pop.pdf"))
+  add_p %>% as_gt()
+gt::gtsave(tbl, expand = 1, zoom = 1,
+           paste0(
+             path,
+             "/Output/sumtable Cancer repartition vs CHIP percent whole pop.pdf"))
 
 # Age
 # pdf(paste0(path, "/Output/Age repartition.pdf"))

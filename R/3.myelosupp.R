@@ -1,5 +1,5 @@
 # Look at CBC in Case_Control
-global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
+global_M4M %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                   "BaseHGB", "ChangeHGB",
                                                   "BasePLT", "ChangePLT",
                                                   "BaseWBC", "ChangeWBC")) %>% 
@@ -14,7 +14,7 @@ global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
   stat_compare_means(size= 3)
 
 # Is it better if separate with CHIP
-global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
+global_M4M %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                   "BaseHGB", "ChangeHGB",
                                                   "BasePLT", "ChangePLT",
                                                   "BaseWBC", "ChangeWBC")) %>% 
@@ -28,7 +28,7 @@ global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
   facet_wrap(. ~ blood_subset, scales = "free",  ncol=2, strip.position = "right")+
   stat_compare_means(aes(group = CHIP), size= 3)
 
-p1 <- global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
+p1 <- global_M4M %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                         "BaseHGB", "ChangeHGB",
                                                         "BasePLT", "ChangePLT",
                                                         "BaseWBC", "ChangeWBC")) %>% 
@@ -41,7 +41,7 @@ p1 <- global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
   geom_boxplot()+
   facet_wrap(. ~ blood_subset, scales = "free",  ncol=2, strip.position = "right")+
   stat_compare_means(size= 3)
-p2 <- global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
+p2 <- global_M4M %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                         "BaseHGB", "ChangeHGB",
                                                         "BasePLT", "ChangePLT",
                                                         "BaseWBC", "ChangeWBC")) %>% 
@@ -65,7 +65,7 @@ gridExtra::grid.arrange(p1, p2, ncol = 2, widths= c(4,6),
 
 
 
-# tbl1 <- global_data %>% 
+# tbl1 <- global_M4M %>% 
 #   filter(CHIP == "CHIP") %>% 
 #   select(Case_Control,
 #          BaseANC
@@ -73,7 +73,7 @@ gridExtra::grid.arrange(p1, p2, ncol = 2, widths= c(4,6),
 #   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
 #   add_n()
-# tbl2 <- global_data %>% 
+# tbl2 <- global_M4M %>% 
 #   filter(CHIP == "No CHIP") %>% 
 #   select(Case_Control,
 #          BaseANC
@@ -87,7 +87,7 @@ gridExtra::grid.arrange(p1, p2, ncol = 2, widths= c(4,6),
 
 
 # What if we compare Case_Control
-global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
+global_M4M %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                   "BaseHGB", "ChangeHGB",
                                                   "BasePLT", "ChangePLT",
                                                   "BaseWBC", "ChangeWBC")) %>% 
@@ -101,17 +101,17 @@ global_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
   facet_wrap(. ~ blood_subset, scales = "free",  ncol=2, strip.position = "right")+
   stat_compare_means(size= 3)
 
-global_data %>% gather("blood_subset", "value", c("ChangeANC","ChangeHGB","ChangePLT","ChangeWBC")) %>% 
+global_M4M %>% gather("blood_subset", "value", c("ChangeANC","ChangeHGB","ChangePLT","ChangeWBC")) %>% 
   select("NGS_ID", "blood_subset", "value", "CHIP", "Case_Control") %>% 
   ggplot(aes(x=CHIP, y=abs(value), fill=Case_Control))+
   geom_bar(stat = "summary_bin")+
   facet_wrap(. ~ blood_subset, scales = "free",  ncol=2)+
   stat_compare_means(aes(group = Case_Control), label.y= 0, size= 3)
-min(global_data$ChangeANC, na.rm = TRUE)
-max(global_data$ChangeANC, na.rm = TRUE)
-mean(global_data$ChangeANC, na.rm = TRUE)
+min(global_M4M$ChangeANC, na.rm = TRUE)
+max(global_M4M$ChangeANC, na.rm = TRUE)
+mean(global_M4M$ChangeANC, na.rm = TRUE)
 
-global_data %>% gather("blood_subset", "value", c("BaseANC","BaseHGB","BasePLT","BaseWBC")) %>% 
+global_M4M %>% gather("blood_subset", "value", c("BaseANC","BaseHGB","BasePLT","BaseWBC")) %>% 
   select("NGS_ID", "blood_subset", "value", "CHIP", "Case_Control") %>% 
   ggplot(aes(x=CHIP, y=value, fill=Case_Control))+
   geom_bar(stat = "summary_bin")+
@@ -121,7 +121,7 @@ global_data %>% gather("blood_subset", "value", c("BaseANC","BaseHGB","BasePLT",
 
 
 # Strata----
-global_data %>% 
+global_M4M %>% 
   ggpaired(x = "Case_Control", y = "BaseANC",
            id = "Strata",
               color = "Case_Control", 
