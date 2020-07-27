@@ -321,17 +321,17 @@ ggplot(muts_data.summary, aes(x=Case_Control, y=median, fill=Case_Control)) +
 # VAF 10%----VAF is defined as the number of alternative reads divided by the total read depth
 muts_data.summ <- muts_data %>%
   group_by(Case_Control) %>% 
-  filter(!is.na(CHIP_VAF)) %>% 
+  filter(!is.na(VAF_10P)) %>% 
   summarise(
-    sd = sd(CHIP_VAF, na.rm = TRUE),
-    CHIP_VAF = mean(CHIP_VAF, na.rm = TRUE),
-    median = median(CHIP_VAF, na.rm = TRUE),
-    min = min(CHIP_VAF, na.rm = TRUE),
-    max = max(CHIP_VAF, na.rm = TRUE),
-    mean = mean(CHIP_VAF, na.rm = TRUE)
+    sd = sd(VAF_10P, na.rm = TRUE),
+    VAF_10P = mean(VAF_10P, na.rm = TRUE),
+    median = median(VAF_10P, na.rm = TRUE),
+    min = min(VAF_10P, na.rm = TRUE),
+    max = max(VAF_10P, na.rm = TRUE),
+    mean = mean(VAF_10P, na.rm = TRUE)
   )
 # jpeg(paste0(path, "/Output/VAF10% in Case_Control.jpeg"))
-ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= CHIP_VAF, color=Case_Control)) +
+ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= VAF_10P, color=Case_Control)) +
   geom_jitter(
     position = position_jitter(0.2), color = "lightgray"
   ) + 
@@ -345,8 +345,8 @@ ggplot(muts_data %>% filter(!is.na(Case_Control)), aes(x=Case_Control, y= CHIP_V
 # tbl <- 
 muts_data %>% 
   group_by(Case_Control) %>% 
-  filter(!is.na(CHIP_VAF)) %>% 
-  select(Case_Control, CHIP_VAF) %>% 
+  filter(!is.na(VAF_10P)) %>% 
+  select(Case_Control, VAF_10P) %>% 
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall() %>% as_gt()
 # gt::gtsave(tbl, expand = 1, zoom = .5,
@@ -354,7 +354,19 @@ muts_data %>%
 #              path,
 #              "/Output/sum VAF10% in Case_Control.pdf"))
 
-
+# Prevalence when CHIP for 10%
+global_data %>% group_by(Case_Control,CHIP_VAF_10P) %>% 
+  summarise(count=n()) %>% 
+  mutate(perc=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=Case_Control, y= perc, fill=CHIP_VAF_10P))+
+  geom_bar(stat="identity") +
+  labs(x = "", y = "percent", title = "Prevalence of CHIP") +
+  theme_minimal()+
+  geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
+  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_data$Case_Control, global_data$CHIP_VAF_10P))[3]),
+           color = "black", size = 6, hjust = 0, vjust = 1)
 
 
 

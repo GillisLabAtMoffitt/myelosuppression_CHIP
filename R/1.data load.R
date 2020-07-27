@@ -58,7 +58,10 @@ CHIP_muts <- CHIP_muts %>%
     is.na(DATA) ~ 0,
     !is.na(DATA) ~ 1
   )) %>% 
-  mutate(CHIP = factor(CHIP, labels= c("CHIP", "No CHIP"), levels= c(1, 0)))
+  mutate(CHIP = factor(CHIP, labels= c("CHIP", "No CHIP"), levels= c(1, 0))) %>% 
+  mutate(VAF_10P = case_when(
+    VAF >= 0.1 ~ VAF
+    ))
 
 #######################################################################################  III  ### Data binding----
 # Will bind the 2 data but in 2 different ways 
@@ -67,22 +70,23 @@ CHIP_muts <- CHIP_muts %>%
 muts_data <- full_join(clinical[3:37], CHIP_muts, 
                           by = c("NGS_ID" = "patient_id")) %>%
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
-  mutate(CHIP_VAF = case_when(
-    VAF >= 0.1 ~ VAF
-  )) %>% 
   select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
 # write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
 
 # 3.2.Bind to have 1 patient per row, multiple mutation per row----
-CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id ~ rowid(patient_id),
-                    value.var = c("GENE", "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "CHIP")) %>% 
-  select(-CHIP_2, -CHIP_3, -CHIP_4) %>% 
-  rename(CHIP = CHIP_1)
+CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id+CHIP ~ rowid(patient_id),
+                    value.var = c("GENE", "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "VAF_10P")) %>% 
+  mutate(CHIP_VAF_10P = factor(ifelse(
+    !is.na(VAF_10P_1) | !is.na(VAF_10P_2) | !is.na(VAF_10P_3) | !is.na(VAF_10P_4) | !is.na(VAF_10P_5) |
+    !is.na(VAF_10P_6) | !is.na(VAF_10P_7) | !is.na(VAF_10P_8) | !is.na(VAF_10P_9) | !is.na(VAF_10P_10) |
+    !is.na(VAF_10P_11) | !is.na(VAF_10P_12) | !is.na(VAF_10P_13) | !is.na(VAF_10P_14) | !is.na(VAF_10P_15) |
+    !is.na(VAF_10P_16), "CHIP", "No CHIP"))
+  )
 
 global_data <- left_join(clinical[, c(1,3:37)], CHIP_muts1, 
                        by = c("NGS_ID" = "patient_id")) %>% 
   filter(str_detect(NGS_ID, "M4M")) %>% # remove later
-  select("Patient", "NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
+  select("Patient", "NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", "CHIP_VAF_10P", everything())
 
 # write_csv(global_data, paste0(path, "/Output/data output/global_data.csv"))
 
