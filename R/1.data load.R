@@ -26,7 +26,6 @@ CHIP_muts <-
 clinical <- clinical %>% 
   mutate(Cases_Controls = Case_Control) %>% 
   mutate(Case_Control = factor(Case_Control, labels = c("Cases", "Controls"), levels= c(1, 0))) %>% # 0 = ctrl
-  # mutate(Case_Control = factor(Case_Control, labels= c("Controls", "Cases"))) %>% 
   mutate(old_CHIP = factor(old_CHIP, labels=c("No CHIP", "CHIP"))) %>% 
   mutate(old_CHPD= factor(old_CHPD, labels=c("No CHPD", "CHPD"))) %>% 
   mutate(Race = factor(Race, labels=c("White", "Other"))) %>% 
@@ -43,8 +42,7 @@ clinical <- clinical %>%
   mutate(leuko = Leuko) %>% 
   mutate(Leuko = factor(Leuko, labels=c("No", "Yes"))) %>%
   mutate(Prior_chemo = factor(Prior_chemo, labels=c("No", "Yes"))) %>% 
-  mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes"))) %>%
-  filter(Cohort == "M4M") # remove later
+  mutate(Prior_rad = factor(Prior_rad, labels=c("No", "Yes")))
 
 # 2.2.CHIP data----
 CHIP_muts <- full_join(CHIP_muts1 %>% 
@@ -67,10 +65,9 @@ CHIP_muts <- CHIP_muts %>%
 # Will bind the 2 data but in 2 different ways 
 
 # 3.1.Bind to have 1 mutation per row, multiple row per patient----
-muts_data <- full_join(clinical[3:37], CHIP_muts, 
+muts_data <- full_join(clinical[2:37], CHIP_muts, 
                           by = c("NGS_ID" = "patient_id")) %>%
-  filter(str_detect(NGS_ID, "M4M")) %>% # remove later
-  select("NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
+  select("NGS_ID", "Cohort", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
 # write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
 
 # 3.2.Bind to have 1 patient per row, multiple mutation per row----
@@ -83,11 +80,12 @@ CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id+CHIP ~ rowid(patient_id),
     !is.na(VAF_10P_16), "CHIP", "No CHIP"))
   )
 
-global_data <- left_join(clinical[, c(1,3:37)], CHIP_muts1, 
+global_data <- left_join(clinical, CHIP_muts1, 
                        by = c("NGS_ID" = "patient_id")) %>% 
-  filter(str_detect(NGS_ID, "M4M")) %>% # remove later
-  select("Patient", "NGS_ID", "Case_Control", "Strata", "old_CHIP", "CHIP", "CHIP_VAF_10P", everything())
-
+  select("Patient", "NGS_ID", "Cohort", "Case_Control", "Strata", "old_CHIP", "CHIP", "CHIP_VAF_10P", everything()) %>% 
+  mutate(CHIP = coalesce(CHIP, old_CHIP))
 # write_csv(global_data, paste0(path, "/Output/data output/global_data.csv"))
+
+global_M4M <- global_data %>% filter(Cohort == "M4M")
 
 rm(CHIP_muts1)

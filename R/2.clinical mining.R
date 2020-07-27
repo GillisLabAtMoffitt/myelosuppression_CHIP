@@ -1,4 +1,4 @@
-print(paste("This data have", dim(global_data)[2], "variables on", dim(global_data)[1], "patients.",
+writeLines(paste("This data have", dim(global_data)[2], "variables on", dim(global_data)[1], "patients.",
             sum(str_detect(global_data$Case_Control,"Cases")), "are cases,", sum(str_detect(global_data$Case_Control,"Controls")), "are controls.
             In 2018 as we had 44 cases and 87 controls."))
 
@@ -6,20 +6,23 @@ print(paste("This data have", dim(global_data)[2], "variables on", dim(global_da
 
 # 1.1 CHIP prevalence----
 # jpeg(paste0(path, "/Output/CHIP prevalence.jpeg"))
-global_data %>% group_by(Case_Control,CHIP) %>% 
+global_M4M %>% group_by(Case_Control,CHIP) %>% 
   summarise(count=n()) %>% 
   mutate(perc=(count/sum(count)*100)
   ) %>% 
   ggplot(aes(x=Case_Control, y= perc, fill=CHIP))+
   geom_bar(stat="identity") +
-  labs(x = "", y = "percent", title = "Prevalence of CHIP") +
+  labs(x = "", y = "percent", title = "Prevalence of CHIP in M4M data") +
   theme_minimal()+
   geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
   geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
-  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_data$Case_Control, global_data$CHIP))[3]),
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_M4M$Case_Control, global_M4M$CHIP))[3]),
            color = "black", size = 6, hjust = 0, vjust = 1)
 # dev.off()
-
+global_M4M %>% 
+  select(Case_Control, CHIP) %>% 
+  tbl_summary(by= Case_Control) %>% 
+  add_p() %>% add_overall()
 # CHPD prevalence
 # pdf(paste0(path, "/Output/CHPD prevalence.pdf"))
 # global_data %>% group_by(Case_Control,CHPD) %>% 
@@ -35,6 +38,19 @@ global_data %>% group_by(Case_Control,CHIP) %>%
 #   annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_data$Case_Control, global_data$CHPD))[3]),
 #            color = "black", size = 6, hjust = 0, vjust = 1)
 # dev.off()
+
+global_data %>% group_by(Case_Control,CHIP) %>% 
+  summarise(count=n()) %>% 
+  mutate(perc=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=Case_Control, y= perc, fill=CHIP))+
+  geom_bar(stat="identity") +
+  labs(x = "", y = "percent", title = "Prevalence of CHIP in M4M+UNC data") +
+  theme_minimal()+
+  geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
+  geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_data$Case_Control, global_data$CHIP))[3]),
+           color = "black", size = 6, hjust = 0, vjust = 1)
 
 # tbl <- 
   global_data %>% 
@@ -355,7 +371,7 @@ muts_data %>%
 #              "/Output/sum VAF10% in Case_Control.pdf"))
 
 # Prevalence when CHIP for 10%
-global_data %>% group_by(Case_Control,CHIP_VAF_10P) %>% 
+global_M4M %>% group_by(Case_Control,CHIP_VAF_10P) %>% 
   summarise(count=n()) %>% 
   mutate(perc=(count/sum(count)*100)
   ) %>% 
@@ -365,9 +381,12 @@ global_data %>% group_by(Case_Control,CHIP_VAF_10P) %>%
   theme_minimal()+
   geom_text(aes(label = round(perc,2)), size = 3, position = position_stack(vjust = 0.5))+
   geom_text(aes(label = paste0("n=", count)), size = 3, position = position_stack(vjust = 0.25))+
-  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_data$Case_Control, global_data$CHIP_VAF_10P))[3]),
+  annotate("text", x = 0, y = 105, label = paste0("p=",chisq.test(table(global_M4M$Case_Control, global_M4M$CHIP_VAF_10P))[3]),
            color = "black", size = 6, hjust = 0, vjust = 1)
-
+global_M4M %>% 
+  select(Case_Control, CHIP_VAF_10P) %>% 
+  tbl_summary(by= Case_Control) %>% 
+  add_p() %>% add_overall() %>% as_kable()
 
 
 # Genes----
@@ -435,6 +454,7 @@ muts_data %>%
 
 # CHIP vs GENE----
 muts_data %>%
+  distinct(NGS_ID, GENE, .keep_all = TRUE) %>% 
   select(CHIP, GENE) %>% 
   tbl_summary(by=CHIP) %>% 
   add_p() %>%
@@ -465,7 +485,7 @@ muts_data %>%
 ############################################################################################## III ### Clinical mining----
 
 # Cancer repartition pie ----
-tbl <- as.data.frame(table(global_data$CANCER))
+tbl <- as.data.frame(table(global_M4M$CANCER))
 colourCount = length(unique(tbl$Var1))
 getPalette = colorRampPalette(RColorBrewer::brewer.pal(8, "Accent"))(colourCount)
 # jpeg(paste0(path, "/Output/Cancer repartition.jpeg"))
@@ -475,10 +495,10 @@ tbl %>% mutate(Var1 = fct_reorder(Var1, desc(Freq))) %>%
   scale_fill_manual(name = "Cancer type", values = getPalette) +
   theme_minimal() +
   coord_polar("y", start=0, direction=-1) +
-  labs(x="", y="", title="Cancer type Repartition")
+  labs(x="", y="", title="Cancer type Repartition in M4M")
 # dev.off()
 
-tbl <- as.data.frame(table(global_data$CHIP,global_data$CANCER))
+tbl <- as.data.frame(table(global_M4M$CHIP,global_M4M$CANCER))
 # jpeg(paste0(path, "/Output/Cancer repartition vs CHIP.jpeg"))
 tbl %>% mutate(Var2 = fct_reorder(Var2, Freq)) %>%
   ggplot(aes(x=Var2, y=Freq, fill=Var1)) +
@@ -490,7 +510,7 @@ tbl %>% mutate(Var2 = fct_reorder(Var2, Freq)) %>%
   labs(x="Cancer Type", y="Number of Patient", title="CHIP in Cancer type Repartition")
 # dev.off()
 
-global_data %>% group_by(CANCER,CHIP) %>% 
+global_M4M %>% group_by(CANCER,CHIP) %>% 
   summarise(count=n()) %>% 
   mutate(perc=(count/sum(count)*100)
   ) %>% 
@@ -501,7 +521,7 @@ global_data %>% group_by(CANCER,CHIP) %>%
   coord_flip()
 
 # jpeg(paste0(path, "/Output/Cancer repartition vs CHIP percent whole pop.jpeg"))
-global_data %>% group_by(CANCER,CHIP) %>% 
+global_M4M %>% group_by(CANCER,CHIP) %>% 
   summarise(count=n()) %>% 
   mutate(percent=(count/NROW(muts_data$CANCER)*100)
   ) %>% 
@@ -513,7 +533,7 @@ global_data %>% group_by(CANCER,CHIP) %>%
 # dev.off()
 
 # tbl <- 
-global_data %>% 
+global_M4M %>% 
   select(CHIP, CANCER) %>% 
   tbl_summary(by=CHIP) %>% 
   add_p %>% 
@@ -525,7 +545,7 @@ global_data %>%
 
 # Age
 # pdf(paste0(path, "/Output/Age repartition.pdf"))
-qplot(x =Age, data=global_data, fill=..count.., geom="histogram")+
+qplot(x =Age, data=global_M4M, fill=..count.., geom="histogram")+
   scale_fill_viridis_c(
     alpha = 1,
     begin = 0,
@@ -543,13 +563,13 @@ qplot(x =Age, data=global_data, fill=..count.., geom="histogram")+
 # dev.off()
 
 # pdf(paste0(path, "/Output/Age repartition.pdf"))
-global_data %>% 
+global_M4M %>% 
   ggplot(aes(x=Age)) +
   geom_freqpoly()
 # dev.off()
 
 # jpeg(paste0(path, "/Output/Age.jpeg")) # Age per cancer
-ggplot(data = global_data, aes(x=CANCER, y=Age), fill=CANCER) +
+ggplot(data = global_M4M, aes(x=CANCER, y=Age), fill=CANCER) +
   geom_boxplot(color= magma(n=22)) +
   theme_minimal() +
   labs(x="Cancer type", y="Age", title="Age repartition per cancer") +
@@ -557,7 +577,7 @@ ggplot(data = global_data, aes(x=CANCER, y=Age), fill=CANCER) +
   geom_jitter(shape=16, position=position_jitter(0.2))
 # dev.off()
 # jpeg(paste0(path, "/Output/Age vs CHIP.jpeg")) # Age per cancer
-ggplot(data = global_data, aes(x=CANCER, y=Age), fill=CANCER) +
+ggplot(data = global_M4M, aes(x=CANCER, y=Age), fill=CANCER) +
   geom_boxplot(color= magma(n=31)) +
   theme_minimal() +
   labs(x="Cancer type", y="Age", title="Age repartition per cancer") +
@@ -567,13 +587,13 @@ ggplot(data = global_data, aes(x=CANCER, y=Age), fill=CANCER) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Gender.pdf"))
-ggplot(data = global_data, aes(x=Gender, y=Age), fill=Gender) +
+ggplot(data = global_M4M, aes(x=Gender, y=Age), fill=Gender) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Gender", y="Age", title="Age repartition") +
   geom_jitter(shape=16, position=position_jitter(0.2))
 
-ggplot(data = global_data, aes(x=Gender, y=Age), fill=Gender) +
+ggplot(data = global_M4M, aes(x=Gender, y=Age), fill=Gender) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Gender", y="Age", title="Age repartition") +
@@ -582,7 +602,7 @@ ggplot(data = global_data, aes(x=Gender, y=Age), fill=Gender) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Race.pdf"))
-ggplot(data = global_data, aes(x=Race, y=Age), fill=Race) +
+ggplot(data = global_M4M, aes(x=Race, y=Age), fill=Race) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Race", y="Age", title="Age repartition") +
@@ -591,7 +611,7 @@ ggplot(data = global_data, aes(x=Race, y=Age), fill=Race) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Ethnicity.pdf"))
-ggplot(data = global_data, aes(x=Ethnicity, y=Age), fill=Ethnicity) +
+ggplot(data = global_M4M, aes(x=Ethnicity, y=Age), fill=Ethnicity) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Ethnicity", y="Age", title="Age repartition") +
@@ -600,7 +620,7 @@ ggplot(data = global_data, aes(x=Ethnicity, y=Age), fill=Ethnicity) +
 # dev.off()
 
 # pdf(paste0(path, "/Output/Smoking.pdf"))
-ggplot(data = global_data, aes(x=Smoking, y=Age), fill=Smoking) +
+ggplot(data = global_M4M, aes(x=Smoking, y=Age), fill=Smoking) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Smoking", y="Age", title="Age repartition") +
@@ -608,11 +628,11 @@ ggplot(data = global_data, aes(x=Smoking, y=Age), fill=Smoking) +
   facet_grid(. ~ CHIP)
 # dev.off()
 
-tbl1 <- global_data %>% filter(CHIP == "CHIP") %>% 
+tbl1 <- global_M4M %>% filter(CHIP == "CHIP") %>% 
   select(Age, Race) %>% 
   tbl_summary(by=Race, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Race")) %>% 
   add_p() %>% add_overall()
-tbl2 <- global_data %>% filter(CHIP == "No CHIP") %>% 
+tbl2 <- global_M4M %>% filter(CHIP == "No CHIP") %>% 
   select(Age, Race) %>% 
   tbl_summary(by=Race, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Race")) %>% 
   add_p() %>% add_overall()
@@ -626,11 +646,11 @@ tbl2 <- global_data %>% filter(CHIP == "No CHIP") %>%
 #              path,
 #              "/Output/sumtable Age per race in CHIP.pdf"))
 
-tbl1 <- global_data %>% filter(CHIP == "CHIP") %>% 
+tbl1 <- global_M4M %>% filter(CHIP == "CHIP") %>% 
   select(Age, Ethnicity) %>% 
   tbl_summary(by=Ethnicity, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Ethnicity")) %>% 
   add_p() %>% add_overall()
-tbl2 <- global_data %>% filter(CHIP == "No CHIP") %>% 
+tbl2 <- global_M4M %>% filter(CHIP == "No CHIP") %>% 
   select(Age, Ethnicity) %>% 
   tbl_summary(by=Ethnicity, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Ethnicity")) %>% 
   add_p() %>% add_overall()
@@ -644,11 +664,11 @@ tbl2 <- global_data %>% filter(CHIP == "No CHIP") %>%
 #              path,
 #              "/Output/sumtable Age per ethnicity in CHIP.pdf"))
 
-tbl1 <- global_data %>%filter(CHIP == "CHIP") %>% 
+tbl1 <- global_M4M %>%filter(CHIP == "CHIP") %>% 
   select(Age, Smoking) %>% 
   tbl_summary(by=Smoking, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Smoking")) %>% 
   add_p() %>% add_overall()
-tbl2 <- global_data %>%filter(CHIP == "No CHIP") %>% 
+tbl2 <- global_M4M %>%filter(CHIP == "No CHIP") %>% 
   select(Age, Smoking) %>% 
   tbl_summary(by=Smoking, statistic = all_continuous() ~ "{median} ({sd})", label = list(Age ~ "Age per Smoking")) %>% 
   add_p() %>% add_overall()
@@ -663,20 +683,20 @@ tbl2 <- global_data %>%filter(CHIP == "No CHIP") %>%
 #              "/Output/sumtable Age per smoking in CHIP.pdf"))
 
 # jpeg(paste0(path, "/Output/Metastasis.jpeg"))
-ggplot(data = global_data, aes(x=Mets, y=Age), fill=Mets) +
+ggplot(data = global_M4M, aes(x=Mets, y=Age), fill=Mets) +
   geom_boxplot() +
   theme_minimal() +
   labs(x="Mets", y="Age", title="Age repartition") +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
   facet_grid(. ~ CHIP)
 # dev.off()
-global_data %>%
+global_M4M %>%
   select(Age, Mets) %>% 
   tbl_summary(by=Mets, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall()
 
 # tbl <- 
-  global_data %>%
+  global_M4M %>%
   select(CHIP, Mets) %>% 
   tbl_summary(by=CHIP) %>% 
   add_p() %>% add_overall() %>% as_gt()
@@ -686,7 +706,7 @@ global_data %>%
 #              "/Output/sumtable Metastasis in CHIP.pdf"))
 
 # Neutro, Anemia, Thrombo, Leuko----
-global_data %>% 
+global_M4M %>% 
   select(CHIP,
          Neutro, Anemia, Thrombo, Leuko
   ) %>% 
@@ -697,7 +717,7 @@ global_data %>%
 # Table 1_Patient Population----
 # Case_Control
 # tbl <- 
-    global_data %>% 
+    global_M4M %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
          ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
@@ -714,7 +734,7 @@ global_data %>%
 
 # CHIP
 # tbl <- 
-  global_data %>% 
+  global_M4M %>% 
   select(CHIP, Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
          ChangeANC, ChangeHGB, ChangePLT, ChangeWBC, 
@@ -730,7 +750,7 @@ global_data %>%
 #              "/Output/Table 2_CHIP vs no CHIP.pdf"))
   
 # Combined----
-tbl1 <- global_data %>% 
+tbl1 <- global_M4M %>% 
   filter(CHIP == "CHIP") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -741,7 +761,7 @@ tbl1 <- global_data %>%
   tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>%
   add_n()
-tbl2 <- global_data %>% 
+tbl2 <- global_M4M %>% 
   filter(CHIP == "No CHIP") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -762,7 +782,7 @@ tbl2 <- global_data %>%
 
 # without the unknown
 tbl1 <- 
-  global_data %>% 
+  global_M4M %>% 
   filter(CHIP == "CHIP") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -774,7 +794,7 @@ tbl1 <-
               missing = "no") %>% 
   add_p() %>%
   add_n()
-tbl2 <- global_data %>% 
+tbl2 <- global_M4M %>% 
   filter(CHIP == "No CHIP") %>% 
   select(Case_Control, Age, Gender, Race, Ethnicity, Smoking, Mets, 
          BaseANC, BaseHGB, BasePLT, BaseWBC,
@@ -793,12 +813,12 @@ tbl_merge(list(tbl1, tbl2),
 
 
 # CHIP in age, gender, race, ethnicity
-# tbl1 <- global_data %>% 
+# tbl1 <- global_M4M %>% 
 #   select(CHIP, Age, Gender, Race, Ethnicity) %>% 
 #   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
 #   add_n()
-# tbl2 <- global_data %>% 
+# tbl2 <- global_M4M %>% 
 #   select(CHPD, Age, Gender, Race, Ethnicity) %>% 
 #   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
@@ -811,12 +831,12 @@ tbl_merge(list(tbl1, tbl2),
 #              "/Output/CHIP_CHPD in age, gender, race, ethnicity.pdf"))
 
 # CHIP in comorbidity ans mets
-# tbl1 <- global_data %>% 
+# tbl1 <- global_M4M %>% 
 #   select(CHIP, Smoking, Mets) %>% 
 #   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
 #   add_n()
-# tbl2 <- global_data %>% 
+# tbl2 <- global_M4M %>% 
 #   select(CHPD, Smoking, Mets) %>% 
 #   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
@@ -828,12 +848,12 @@ tbl_merge(list(tbl1, tbl2),
 #              path, 
 #              "/Output/CHIP_CHPD in comorbidity ans mets.pdf"))
 
-# tbl1 <- global_data %>% 
+# tbl1 <- global_M4M %>% 
 #   select(CHIP, Age, CANCER) %>%
 #   tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
 #   add_n()
-# tbl2 <- global_data %>% 
+# tbl2 <- global_M4M %>% 
 #   select(CHPD, Age, CANCER) %>%
 #   tbl_summary(by= CHPD, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
@@ -845,7 +865,7 @@ tbl_merge(list(tbl1, tbl2),
 #              path, 
 #              "/Output/CHIP_CHPD in age and cancer.pdf"))
 
-# tbl <- global_data %>% 
+# tbl <- global_M4M %>% 
 #   select(CHIP, CHPD, CANCER) %>%
 #   tbl_summary(by= CANCER, statistic = all_continuous() ~ "{median} ({sd})") %>% 
 #   add_p() %>%
