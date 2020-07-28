@@ -707,6 +707,19 @@ global_M4M %>%
   tbl_summary(by=Mets, statistic = all_continuous() ~ "{median} ({sd})") %>% 
   add_p() %>% add_overall()
 
+global_M4M %>% 
+  group_by(CHIP, Case_Control,Mets) %>% 
+  summarise(count=n()) %>% 
+  mutate(percent=(count/sum(count)*100)
+  ) %>% 
+  ggplot(aes(x=Case_Control, y=percent, fill=Mets)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  facet_grid(. ~ CHIP)+
+  scale_y_continuous(expand = c(0, 0))+
+  theme(strip.background = element_rect(colour="darkgrey", fill="white",
+                                        size=1.5, linetype="solid"))
+
 # tbl <- 
   global_M4M %>%
   select(CHIP, Mets) %>% 
