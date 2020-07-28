@@ -19,6 +19,18 @@ logistic <- glm(Cases_Controls ~ BaseANC+BaseHGB+BasePLT+BaseWBC,
                 data = global_data, family = "binomial")
 summary(logistic)
 
+
+
+logistic <- clogit(Cases_Controls ~ Age+BaseANC+BaseHGB+BasePLT+BaseWBC+MAX2heme + strata(Strata),
+                   data = global_M4M)
+summary(logistic)
+logistic <- clogit(Cases_Controls ~ Age+BaseANC+BaseHGB+BasePLT+BaseWBC+MAX2heme+Prior_rad + strata(Strata),
+                   data = global_M4M)
+summary(logistic)
+
+
+
+
 # Case_Control predicted using Change
 logistic <- clogit(Cases_Controls ~ ChangeANC+ChangeHGB+ChangePLT+ChangeWBC + strata(Strata),
                    data = global_data)

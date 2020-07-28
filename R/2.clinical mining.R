@@ -445,9 +445,11 @@ muts_data %>%
   summarise(count=n()) %>% 
   mutate(percent=(count/sum(count)*100)
   ) %>% 
-  ggplot(aes(x=reorder(GENE, percent), y=percent, fill = Case_Control)) +
-  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
-  coord_flip()
+  ggplot(aes(x=reorder(GENE, -percent), y=percent, fill = Case_Control)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single"))+
+  theme_classic(base_size = 15) +
+  scale_y_continuous(expand = c(0, 0))+
+  labs(x = "Genes")
 # dev.off()
 
 # tbl <- 
@@ -543,15 +545,15 @@ global_M4M %>% group_by(CANCER,CHIP) %>%
   coord_flip()
 # dev.off()
 
-tbl <- 
+# tbl <- 
 global_M4M %>% 
   select(CHIP, CANCER) %>% 
   tbl_summary(by=CHIP) %>% 
   add_p %>% as_gt()
-gt::gtsave(tbl, expand = 1, zoom = 1,
-           paste0(
-             path,
-             "/Output/sumtable Cancer repartition vs CHIP percent whole pop.pdf"))
+# gt::gtsave(tbl, expand = 1, zoom = 1,
+#            paste0(
+#              path,
+#              "/Output/sumtable Cancer repartition vs CHIP percent whole pop.pdf"))
 
 # Age
 # pdf(paste0(path, "/Output/Age repartition.pdf"))
@@ -734,7 +736,8 @@ global_M4M %>%
          Prior_chemo, Prior_rad, 
          MAX2, MAX2heme
   ) %>% 
-  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
   add_p() %>%
   add_n() %>% as_gt()
 # gt::gtsave(tbl, expand = 1, zoom = 2, 
@@ -751,7 +754,8 @@ global_M4M %>%
          Prior_chemo, Prior_rad, 
          MAX2, MAX2heme
   ) %>% 
-  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  tbl_summary(by= CHIP, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
   add_p() %>%
   add_n() %>% as_gt()
 # gt::gtsave(tbl, expand = 1, zoom = 2, 
@@ -768,7 +772,8 @@ tbl1 <- global_M4M %>%
          Prior_chemo, Prior_rad, 
          MAX2, MAX2heme
   ) %>% 
-  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
   add_p() %>%
   add_n()
 tbl2 <- global_M4M %>% 
@@ -779,7 +784,8 @@ tbl2 <- global_M4M %>%
          Prior_chemo, Prior_rad, 
          MAX2, MAX2heme
   ) %>% 
-  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})") %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
   add_p() %>%
   add_n()
 # tbl <- 
