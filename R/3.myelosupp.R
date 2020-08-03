@@ -131,11 +131,23 @@ global_M4M %>%
 
 
 
-
-
-
-
-
+# VAF vs Cytopenia----
+# jpeg(paste0(path, "/Output/Cytopenia in VAF-NoCHIP groups.jpeg"))
+muts_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
+                                                 "BaseHGB", "ChangeHGB",
+                                                 "BasePLT", "ChangePLT",
+                                                 "BaseWBC", "ChangeWBC")) %>%
+  filter(!is.na(CHIP)) %>% 
+  select("NGS_ID", "blood_subset", "value", "CHIP", "Case_Control", "VAF_grp") %>% 
+  mutate(blood_subset= factor(blood_subset, levels = c("BaseANC", "ChangeANC",
+                                                       "BaseHGB", "ChangeHGB",
+                                                       "BasePLT", "ChangePLT",
+                                                       "BaseWBC", "ChangeWBC"))) %>% 
+  ggplot(aes(x=VAF_grp, y=abs(value), fill=CHIP))+
+  geom_boxplot()+
+  facet_wrap(. ~ blood_subset, scales = "free",  ncol=2, strip.position = "right")+
+  stat_compare_means(size= 3)
+# dev.off()
 
 
 

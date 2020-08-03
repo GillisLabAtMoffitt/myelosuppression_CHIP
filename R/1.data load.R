@@ -59,7 +59,16 @@ CHIP_muts <- CHIP_muts %>%
   mutate(CHIP = factor(CHIP, labels= c("No CHIP", "CHIP"), levels= c(0, 1))) %>% 
   mutate(VAF_10P = case_when(
     VAF >= 0.1 ~ VAF
-    ))
+    )) %>% 
+  mutate(VAF_grp = case_when(
+    VAF >= 0.1 ~ "VAF >= 10%",
+    VAF < 0.1 ~ "VAF < 10%"
+  )) %>% 
+  mutate(CHIP_DDR = case_when(
+    GENE %in% c("TP53", "PPM1D", "CHEK2") ~ "CHIP",
+    is.na(GENE) ~ "No CHIP",
+    GENE %in% c("ASXL1", "BRCC3", "DNMT3A", "JAK2", "KMT2D", "SF3B1", "SH2B3", "SRSF2", "TET2") ~ "No CHIP"
+  ))
 
 #######################################################################################  III  ### Data binding----
 # Will bind the 2 data but in 2 different ways 
@@ -67,22 +76,33 @@ CHIP_muts <- CHIP_muts %>%
 # 3.1.Bind to have 1 mutation per row, multiple row per patient----
 muts_data <- full_join(clinical[2:37], CHIP_muts, 
                           by = c("NGS_ID" = "patient_id")) %>%
-  select("NGS_ID", "Cohort", "Case_Control", "Strata", "old_CHIP", "CHIP", everything())
+  select("NGS_ID", "Cohort", "Case_Control", "Strata", "old_CHIP", "CHIP", "CHIP_DDR", everything())
 # write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
 
 # 3.2.Bind to have 1 patient per row, multiple mutation per row----
 CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id+CHIP ~ rowid(patient_id),
-                    value.var = c("GENE", "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "VAF_10P")) %>% 
+                    value.var = c("GENE", "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "VAF_10P", "CHIP_DDR")) %>% 
   mutate(CHIP_VAF_10P = factor(ifelse(
     !is.na(VAF_10P_1) | !is.na(VAF_10P_2) | !is.na(VAF_10P_3) | !is.na(VAF_10P_4) | !is.na(VAF_10P_5) |
     !is.na(VAF_10P_6) | !is.na(VAF_10P_7) | !is.na(VAF_10P_8) | !is.na(VAF_10P_9) | !is.na(VAF_10P_10) |
     !is.na(VAF_10P_11) | !is.na(VAF_10P_12) | !is.na(VAF_10P_13) | !is.na(VAF_10P_14) | !is.na(VAF_10P_15) |
     !is.na(VAF_10P_16), "CHIP", "No CHIP"))
-  )
+  ) %>% 
+  mutate(CHIP_VAF_10P = factor(CHIP_VAF_10P, levels = c("No CHIP", "CHIP"))) %>% 
+  mutate(CHIP_DDR1 = factor(ifelse(
+    (CHIP_DDR_1  == "CHIP"| CHIP_DDR_2  == "CHIP"| CHIP_DDR_3  == "CHIP"| CHIP_DDR_4  == "CHIP" |
+      CHIP_DDR_5  == "CHIP" | CHIP_DDR_6  == "CHIP" | CHIP_DDR_7  == "CHIP" | CHIP_DDR_8  == "CHIP" |
+       CHIP_DDR_9  == "CHIP" | CHIP_DDR_10  == "CHIP" | CHIP_DDR_11  == "CHIP" | CHIP_DDR_12  == "CHIP" |
+       CHIP_DDR_13  == "CHIP" | CHIP_DDR_14  == "CHIP" | CHIP_DDR_15  == "CHIP" | CHIP_DDR_16 == "CHIP"),
+    "CHIP", "No CHIP"))
+  ) %>% 
+  mutate(CHIP_DDR = coalesce(CHIP_DDR1, "No CHIP")) %>% 
+  mutate(CHIP_DDR = factor(CHIP_DDR, levels = c("No CHIP", "CHIP")))
 
 global_data <- left_join(clinical, CHIP_muts1, 
-                       by = c("NGS_ID" = "patient_id")) %>% 
-  select("Patient", "NGS_ID", "Cohort", "Case_Control", "Strata", "old_CHIP", "CHIP", "CHIP_VAF_10P", everything()) %>% 
+                       by = c("NGS_ID" = "patient_id")) %>%
+  select("Patient", "NGS_ID", "Cohort", "Case_Control", "Strata", 
+         "old_CHIP", "CHIP", "CHIP_VAF_10P", "CHIP_DDR", everything()) %>% 
   mutate(CHIP = coalesce(CHIP, old_CHIP))
 # write_csv(global_data, paste0(path, "/Output/data output/global_data.csv"))
 
