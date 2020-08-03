@@ -54,9 +54,9 @@ CHIP_muts <- full_join(CHIP_muts1 %>%
 CHIP_muts <- CHIP_muts %>% 
   mutate(CHIP = case_when(
     is.na(DATA) ~ 0,
-    !is.na(DATA) ~ 1
+    !is.na(DATA) ~ 1 # CHIP
   )) %>% 
-  mutate(CHIP = factor(CHIP, labels= c("CHIP", "No CHIP"), levels= c(1, 0))) %>% 
+  mutate(CHIP = factor(CHIP, labels= c("No CHIP", "CHIP"), levels= c(0, 1))) %>% 
   mutate(VAF_10P = case_when(
     VAF >= 0.1 ~ VAF
     ))
