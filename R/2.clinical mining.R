@@ -1,6 +1,11 @@
-writeLines(paste("This data have", dim(global_data)[2], "variables on", dim(global_data)[1], "patients.",
-            sum(str_detect(global_data$Case_Control,"Cases")), "are cases,", sum(str_detect(global_data$Case_Control,"Controls")), "are controls.
+writeLines(paste("M4M+UNC data have", dim(global_data)[2], "variables on", dim(global_data)[1], "patients.",
+            sum(str_detect(global_data$Case_Control,"Cases")), "are cases,", 
+            sum(str_detect(global_data$Case_Control,"Controls")), "are controls.
             In 2018 as we had 44 cases and 87 controls."))
+
+writeLines(paste("M4M data have", dim(global_M4M)[2], "variables on", dim(global_M4M)[1], "patients.",
+                 sum(str_detect(global_M4M$Case_Control,"Cases")), "are cases,", 
+                 sum(str_detect(global_M4M$Case_Control,"Controls")), "are controls."))
 
 ############################################################################################## I ### CHIP----
 
@@ -287,13 +292,6 @@ venn.diagram(
 ############################################################################################## II ### Mutation mining----
 # Allelic Variant----
 
-ggplot(muts_data, aes(x=Case_Control, y= VAF)) +
-  geom_jitter(position = position_jitter(0.25), size = 1.2) +
-  stat_summary(
-    fun.data="mean_sdl",  fun.args = list(mult=1), 
-    geom = "pointrange",  size = 0.4
-  )
-
 muts_data.summary <- muts_data %>%
   group_by(Case_Control) %>% 
   filter(!is.na(VAF)) %>% 
@@ -376,7 +374,7 @@ muts_data %>%
 #              path,
 #              "/Output/sum VAF10% in Case_Control.pdf"))
 
-# Prevalence when CHIP for 10%
+# Prevalence when CHIP for 10%----
 global_M4M %>% group_by(Case_Control,CHIP_VAF_10P) %>% 
   summarise(count=n()) %>% 
   mutate(perc=(count/sum(count)*100)
@@ -438,12 +436,16 @@ muts_data %>%
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) + 
   coord_flip()
 
-# jpeg(paste0(path, "/Output/barplot GENE per patient in Case_Control.jpeg"))
-muts_data %>% 
+# jpeg(paste0(path, "/Output/new barplot GENE per patient in Case_Control.jpeg"), width = 800, height = 500)
+muts_data %>% filter(Cohort == "M4M") %>% 
   distinct(NGS_ID, GENE, .keep_all = TRUE) %>% 
   filter(!is.na(GENE)) %>% group_by(Case_Control,GENE) %>% 
   summarise(count=n()) %>% 
-  mutate(percent=(count/sum(count)*100)
+  mutate(percent= case_when(
+    Case_Control == "Cases" ~ count/(sum(str_detect(global_M4M$Case_Control,"Cases")))*100,
+    Case_Control == "Controls" ~ count/(sum(str_detect(global_M4M$Case_Control,"Controls")))*100
+  )
+
   ) %>% 
   ggplot(aes(x=reorder(GENE, -percent), y=percent, fill = Case_Control)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single"))+
@@ -453,10 +455,14 @@ muts_data %>%
 # dev.off()
 
 # tbl <- 
-  muts_data %>% filter(!is.na(Case_Control)) %>% 
+muts_data %>% filter(!is.na(Case_Control)) %>% filter(Cohort == "M4M") %>% 
   distinct(NGS_ID, GENE, .keep_all = TRUE) %>% 
+  mutate(GENE = case_when(
+    is.na(GENE) ~ "No mutation",
+    TRUE ~ GENE
+  )) %>% 
   select(Case_Control, GENE) %>% 
-  tbl_summary(by=Case_Control) %>% 
+  tbl_summary(by=Case_Control, percent = "column") %>% 
   add_p() %>%
   add_n() %>% as_gt()
 # gt::gtsave(tbl, expand = 1, zoom = 1,
