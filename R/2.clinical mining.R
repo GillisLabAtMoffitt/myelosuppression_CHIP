@@ -912,7 +912,7 @@ tbl_merge(list(tbl1, tbl2),
 
 
 
-# Table CHIP facet Cases without the unknown
+# Table CHIP facet Cases without the unknown---
 tbl1 <- 
   global_M4M %>% 
   filter(Case_Control == "Cases") %>% 
@@ -939,8 +939,12 @@ tbl2 <- global_M4M %>%
   add_p() %>%
   add_n()
 # tbl <- 
-tbl_merge(list(tbl1, tbl2),
+tbl <- tbl_merge(list(tbl1, tbl2),
           tab_spanner = c("**Cases**", "**Controls**"))  %>% as_gt()
+# gt::gtsave(tbl, expand = 1, zoom = 2,
+#            paste0(
+#              path,
+#              "/Output/Table 3_Patient Population faceted by CaseControl.pdf"))
 
 
 
