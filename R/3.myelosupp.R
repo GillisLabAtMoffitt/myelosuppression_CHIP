@@ -132,7 +132,7 @@ global_M4M %>%
 
 
 # VAF vs Cytopenia----
-# jpeg(paste0(path, "/Output/Cytopenia in VAF-NoCHIP groups.jpeg"))
+jpeg(paste0(path, "/Output/Cytopenia in VAF-NoCHIP groups.jpeg"), height = 800, width = 700)
 muts_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                  "BaseHGB", "ChangeHGB",
                                                  "BasePLT", "ChangePLT",
@@ -143,11 +143,14 @@ muts_data %>% gather("blood_subset", "value", c("BaseANC", "ChangeANC",
                                                        "BaseHGB", "ChangeHGB",
                                                        "BasePLT", "ChangePLT",
                                                        "BaseWBC", "ChangeWBC"))) %>% 
+  mutate(VAF_grp = replace_na(VAF_grp , "No CHIP")) %>% 
   ggplot(aes(x=VAF_grp, y=abs(value), fill=CHIP))+
   geom_boxplot()+
+  labs(x = "VAF group", y= "value") +
   facet_wrap(. ~ blood_subset, scales = "free",  ncol=2, strip.position = "right")+
-  stat_compare_means(size= 3)
-# dev.off()
+  stat_compare_means(size= 4)+
+  theme_classic(base_size = 15)
+dev.off()
 
 
 
