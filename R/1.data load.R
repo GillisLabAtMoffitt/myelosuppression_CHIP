@@ -68,20 +68,36 @@ CHIP_muts <- CHIP_muts %>%
     GENE %in% c("TP53", "PPM1D", "CHEK2") ~ "CHIP",
     is.na(GENE) ~ "No CHIP",
     GENE %in% c("ASXL1", "BRCC3", "DNMT3A", "JAK2", "KMT2D", "SF3B1", "SH2B3", "SRSF2", "TET2") ~ "No CHIP"
-  ))
+  )) %>% 
+  mutate(CHIP_epi = case_when(
+    is.na(DATA) ~ 0,
+    !is.na(DATA) & # CHIP
+      GENE %in% c("ASXL1", "DNMT3A", "KMT2D", "TET2") ~ 1,
+    !is.na(DATA) ~ 0
+  )) %>% 
+  mutate(CHIP_epi = factor(CHIP_epi, labels= c("No CHIP", "CHIP"), levels= c(0, 1))) %>% 
+  mutate(CHIP_mds = case_when(
+    is.na(DATA) ~ 0,
+    !is.na(DATA) & # CHIP
+      GENE %in% c("ASXL1", "SF3B1", "SRSF2", "TET2") ~ 1,
+    !is.na(DATA) ~ 0
+  )) %>% 
+  mutate(CHIP_mds = factor(CHIP_mds, labels= c("No CHIP", "CHIP"), levels= c(0, 1)))
 
 #######################################################################################  III  ### Data binding----
 # Will bind the 2 data but in 2 different ways 
 
 # 3.1.Bind to have 1 mutation per row, multiple row per patient----
-muts_data <- full_join(clinical[2:37], CHIP_muts, 
+muts_data <- full_join(clinical %>% select(-1), CHIP_muts, 
                           by = c("NGS_ID" = "patient_id")) %>%
-  select("NGS_ID", "Cohort", "Case_Control", "Strata", "old_CHIP", "CHIP", "CHIP_DDR", everything())
+  select("NGS_ID", "Cohort", "Case_Control", "Strata", "old_CHIP", "CHIP", "CHIP_DDR", "CHIP_epi", "CHIP_mds", everything())
 # write_csv(muts_data, paste0(path, "/Output/data output/muts_data.csv"))
 
 # 3.2.Bind to have 1 patient per row, multiple mutation per row----
 CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id+CHIP ~ rowid(patient_id),
-                    value.var = c("GENE", "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "VAF_10P", "CHIP_DDR")) %>% 
+                    value.var = c("GENE", "FUNCTION", "COSMIC", "ESP6500", "VAF", "DEPTH", "VAF_10P", "CHIP_DDR",
+                                  "CHIP_epi", "CHIP_mds"))
+CHIP_muts1 <- CHIP_muts1 %>% 
   mutate(CHIP_VAF_10P = factor(ifelse(
     !is.na(VAF_10P_1) | !is.na(VAF_10P_2) | !is.na(VAF_10P_3) | !is.na(VAF_10P_4) | !is.na(VAF_10P_5) |
     !is.na(VAF_10P_6) | !is.na(VAF_10P_7) | !is.na(VAF_10P_8) | !is.na(VAF_10P_9) | !is.na(VAF_10P_10) |
@@ -97,12 +113,31 @@ CHIP_muts1 <- dcast(setDT(CHIP_muts), patient_id+CHIP ~ rowid(patient_id),
     "CHIP", "No CHIP"))
   ) %>% 
   mutate(CHIP_DDR = coalesce(CHIP_DDR1, "No CHIP")) %>% 
-  mutate(CHIP_DDR = factor(CHIP_DDR, levels = c("No CHIP", "CHIP")))
+  mutate(CHIP_DDR = factor(CHIP_DDR, levels = c("No CHIP", "CHIP"))) %>% 
+  mutate(CHIP_epi1 = factor(ifelse(
+    (CHIP_epi_1  == "CHIP"| CHIP_epi_2  == "CHIP"| CHIP_epi_3  == "CHIP"| CHIP_epi_4  == "CHIP" |
+       CHIP_epi_5  == "CHIP" | CHIP_epi_6  == "CHIP" | CHIP_epi_7  == "CHIP" | CHIP_epi_8  == "CHIP" |
+       CHIP_epi_9  == "CHIP" | CHIP_epi_10  == "CHIP" | CHIP_epi_11  == "CHIP" | CHIP_epi_12  == "CHIP" |
+       CHIP_epi_13  == "CHIP" | CHIP_epi_14  == "CHIP" | CHIP_epi_15  == "CHIP" | CHIP_epi_16 == "CHIP"),
+    "CHIP", "No CHIP"))
+  ) %>% 
+  mutate(CHIP_epi = coalesce(CHIP_epi1, "No CHIP")) %>% 
+  mutate(CHIP_epi = factor(CHIP_epi, levels = c("No CHIP", "CHIP"))) %>% 
+  mutate(CHIP_mds1 = factor(ifelse(
+    (CHIP_mds_1  == "CHIP"| CHIP_mds_2  == "CHIP"| CHIP_mds_3  == "CHIP"| CHIP_mds_4  == "CHIP" |
+       CHIP_mds_5  == "CHIP" | CHIP_mds_6  == "CHIP" | CHIP_mds_7  == "CHIP" | CHIP_mds_8  == "CHIP" |
+       CHIP_mds_9  == "CHIP" | CHIP_mds_10  == "CHIP" | CHIP_mds_11  == "CHIP" | CHIP_mds_12  == "CHIP" |
+       CHIP_mds_13  == "CHIP" | CHIP_mds_14  == "CHIP" | CHIP_mds_15  == "CHIP" | CHIP_mds_16 == "CHIP"),
+    "CHIP", "No CHIP"))
+  ) %>% 
+  mutate(CHIP_mds = coalesce(CHIP_mds1, "No CHIP")) %>% 
+  mutate(CHIP_mds = factor(CHIP_mds, levels = c("No CHIP", "CHIP")))
+  
 
 global_data <- left_join(clinical, CHIP_muts1, 
                        by = c("NGS_ID" = "patient_id")) %>%
   select("Patient", "NGS_ID", "Cohort", "Case_Control", "Strata", 
-         "old_CHIP", "CHIP", "CHIP_VAF_10P", "CHIP_DDR", everything()) %>% 
+         "old_CHIP", "CHIP", "CHIP_VAF_10P", "CHIP_DDR", "CHIP_epi", "CHIP_mds", everything()) %>% 
   mutate(CHIP = coalesce(CHIP, old_CHIP))
 # write_csv(global_data, paste0(path, "/Output/data output/global_data.csv"))
 

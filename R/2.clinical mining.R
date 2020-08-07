@@ -845,7 +845,31 @@ tbl2 <- global_M4M %>%
 tbl_merge(list(tbl1, tbl2),
           tab_spanner = c("**CHIP**", "**no CHIP**"))  %>% as_gt()
 
-
+tbl1 <- 
+  muts_data %>% 
+  filter(CHIP == "CHIP") %>% 
+  select(Case_Control, VAF
+  ) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
+  add_p() %>%
+  add_n()
+tbl2 <- 
+  muts_data %>% 
+  filter(CHIP == "No CHIP") %>% 
+  select(Case_Control, VAF
+  ) %>% 
+  tbl_summary(by= Case_Control, statistic = all_continuous() ~ "{median} ({sd})",
+              missing = "no") %>% 
+  add_p() %>%
+  add_n()
+# tbl <- 
+tbl_merge(list(tbl1, tbl2),
+          tab_spanner = c("**CHIP**", "**no CHIP**"))  %>% as_gt()
+# gt::gtsave(tbl, expand = 1, zoom = 1,
+#            paste0(
+#              path,
+#              "/Output/Table VAF faceted by CHIP.pdf"))
 
 # CHIP in age, gender, race, ethnicity
 # tbl1 <- global_M4M %>% 
